@@ -17,6 +17,7 @@ class _FavoritasPageState extends State<FavoritasPage> {
       appBar: AppBar(
         centerTitle: true,
         title: Text('Tarefas favoritadas'),
+        backgroundColor: Colors.blue.shade800,
       ),
       body: Container(
         height: MediaQuery.of(context).size.height,

@@ -20,19 +20,25 @@ class _TarefasPageState extends State<TarefasPage> {
   appBarDinamica() {
     if (selecionadas.isEmpty) {
       return AppBar(
-        centerTitle: true,
-        title: const Text('Minhas tarefas'),
-        actions: [
-          IconButton(
-            onPressed: () => {}, // Precisa Implementar
-            icon: const Icon(
-              Icons.swap_vert,
-              size: 30,
+        title: const Padding(
+          padding: EdgeInsets.only(top: 20.0), // Adiciona padding-top
+          child: Text(
+            'Minhas Tarefas',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.w500,
+              fontFamily: 'Roboto',
             ),
           ),
-        ],
+        ),
         elevation: 2,
-        backgroundColor: Colors.blue.shade900,
+        backgroundColor: Colors.blueGrey[50],
+        titleTextStyle: const TextStyle(
+          fontSize: 24,
+          fontWeight: FontWeight.w500,
+          fontFamily: 'Roboto',
+        ),
+        titleSpacing: 46, // Alinha o título à esquerda
       );
     } else {
       return AppBar(
@@ -45,7 +51,7 @@ class _TarefasPageState extends State<TarefasPage> {
           },
         ),
         centerTitle: true,
-        title: Text('Quantidade: ${selecionadas.length}'),
+        title: Text('Tarefas: ${selecionadas.length}'),
         actions: [
           IconButton(
             onPressed: () {
@@ -61,13 +67,7 @@ class _TarefasPageState extends State<TarefasPage> {
             icon: const Icon(
               Icons.star,
               size: 25,
-            ),
-          ),
-          IconButton(
-            onPressed: () => {}, // Precisa Implementar o sort
-            icon: const Icon(
-              Icons.swap_vert,
-              size: 25,
+              color: Colors.amber,
             ),
           ),
         ],
@@ -97,6 +97,12 @@ class _TarefasPageState extends State<TarefasPage> {
     });
   }
 
+  excluirTarefa(Tarefa tarefa) {
+    setState(() {
+      TarefasRepository.tabela.remove(tarefa);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     favoritas = Provider.of<TarefasFavoritasRepository>(context);
@@ -104,66 +110,95 @@ class _TarefasPageState extends State<TarefasPage> {
 
     return Scaffold(
       appBar: appBarDinamica(),
-      body: ListView.separated(
-        itemBuilder: (BuildContext context, int tarefa) {
-          return ListTile(
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(15)),
-            ),
-            leading: (selecionadas.contains(tabela[tarefa]))
-                ? const CircleAvatar(
-                    child: Icon(Icons.check),
-                  )
-                : CircleAvatar(
-                    child: Icon(
-                      tabela[tarefa].status == 'Concluído'
-                          ? Icons.check_circle
-                          : Icons.circle,
-                    ),
-                  ),
-            title: Row(
+      body: ListView.builder(
+        itemCount: tabela.length,
+        itemBuilder: (BuildContext context, int index) {
+          final tarefa = tabela[index];
+          return Card(
+            margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+            child: Column(
               children: [
-                Expanded(
-                  child: Text(
-                    tabela[tarefa].nome,
+                ListTile(
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(15)),
+                  ),
+                  leading: (selecionadas.contains(tarefa))
+                      ? const CircleAvatar(
+                          child: Icon(Icons.check),
+                        )
+                      : CircleAvatar(
+                          child: Icon(
+                            tarefa.status == 'Concluído'
+                                ? Icons.check_circle
+                                : Icons.circle,
+                          ),
+                        ),
+                  title: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          tarefa.nome,
+                          style: const TextStyle(
+                            fontSize: 25,
+                          ),
+                        ),
+                      ),
+                      if (favoritas.lista.contains(tarefa))
+                        Icon(Icons.star, color: Colors.amber, size: 25),
+                    ],
+                  ),
+                  trailing: Text(
+                    DateFormat('dd/MM/yyyy').format(tarefa.data),
                     style: const TextStyle(
-                      fontSize: 25,
+                      fontSize: 15,
                     ),
                   ),
+                  selected: selecionadas.contains(tarefa),
+                  selectedTileColor: const Color(0xff4a61e7),
+                  onLongPress: () {
+                    setState(() {
+                      (selecionadas.contains(tarefa))
+                          ? selecionadas.remove(tarefa)
+                          : selecionadas.add(tarefa);
+                    });
+                  },
+                  onTap: () {
+                    selecionadas.isEmpty
+                        ? mostrarDetalhes(tarefa)
+                        : setState(() {
+                            (selecionadas.contains(tarefa))
+                                ? selecionadas.remove(tarefa)
+                                : selecionadas.add(tarefa);
+                          });
+                  },
                 ),
-                if (favoritas.lista.contains(tabela[tarefa]))
-                  Icon(Icons.star, color: Colors.amber, size: 25),
+                if (tarefa.status == 'Concluído')
+                  Padding(
+                    padding: const EdgeInsets.only(
+                        left: 16.0, right: 16.0, bottom: 8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            tarefa.descricao,
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.black54,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.delete, color: Colors.red),
+                          onPressed: () => excluirTarefa(tarefa),
+                        ),
+                      ],
+                    ),
+                  ),
               ],
             ),
-            trailing: Text(
-              DateFormat('dd/MM/yyyy').format(tabela[tarefa].data),
-              style: const TextStyle(
-                fontSize: 15,
-              ),
-            ),
-            selected: selecionadas.contains(tabela[tarefa]),
-            selectedTileColor: const Color(0xff4a61e7),
-            onLongPress: () {
-              setState(() {
-                (selecionadas.contains(tabela[tarefa]))
-                    ? selecionadas.remove(tabela[tarefa])
-                    : selecionadas.add(tabela[tarefa]);
-              });
-            },
-            onTap: () {
-              selecionadas.isEmpty
-                  ? mostrarDetalhes(tabela[tarefa])
-                  : setState(() {
-                      (selecionadas.contains(tabela[tarefa]))
-                          ? selecionadas.remove(tabela[tarefa])
-                          : selecionadas.add(tabela[tarefa]);
-                    });
-            },
           );
         },
-        padding: const EdgeInsets.all(20),
-        separatorBuilder: (_, ___) => const Divider(),
-        itemCount: tabela.length,
       ),
       floatingActionButton: Align(
         alignment: Alignment.bottomCenter,
