@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/tarefa.dart';
+import 'package:intl/intl.dart';
 
 class TarefasDescricaoPage extends StatefulWidget {
   final Tarefa tarefa;
@@ -13,16 +14,23 @@ class TarefasDescricaoPage extends StatefulWidget {
 class _TarefasDescricaoPageState extends State<TarefasDescricaoPage> {
   final _form = GlobalKey<FormState>();
   final _valorDescricao = TextEditingController();
-  //final _valorData = TextEditingController();
 
   concluirTarefa() {
     if (_form.currentState!.validate()) {
-      // Mudar status para completo
-
+      setState(() {
+        widget.tarefa.status = 'Concluído';
+        widget.tarefa.descricao = _valorDescricao.text;
+      });
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Tarefa completada com sucesso')));
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Não inicializamos o campo de texto com a descrição da tarefa
   }
 
   @override
@@ -31,75 +39,68 @@ class _TarefasDescricaoPageState extends State<TarefasDescricaoPage> {
       appBar: AppBar(
         title: Text(widget.tarefa.nome),
       ),
-      body: Column(
-        children: [
-          Text(widget.tarefa.descricao),
-          Text(widget.tarefa.data),
-          Form(
-            key: _form,
-            child: TextFormField(
-              controller: _valorDescricao,
-              style: const TextStyle(fontSize: 20),
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Descrição',
-                prefixIcon: Icon(Icons.keyboard),
-                suffix: Text(
-                  'sufixo',
-                  style: TextStyle(fontSize: 15),
-                ),
-              ),
-              keyboardType: TextInputType.text,
-              validator: (value) {
-                if (value!.isEmpty) {
-                  return 'forme o Texto ##TESTE##';
-                } else {
-                  return null;
-                }
-              },
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Descrição:',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-          ),
-          /*Form(
-            key: _form,
-            child: TextFormField(
-              controller: _valorData,
-              style: const TextStyle(fontSize: 20),
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Descrição',
-                prefixIcon: Icon(Icons.keyboard),
-                suffix: Text(
-                  'sufixo',
-                  style: TextStyle(fontSize: 15),
-                ),
-              ),
-              keyboardType: TextInputType.datetime,
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-              ],
+            SizedBox(height: 10),
+            Text(
+              widget.tarefa.descricao,
+              style: TextStyle(fontSize: 16),
             ),
-          ),*/ // Insercao somente de numeros
-          Container(
-            alignment: Alignment.bottomCenter,
-            margin: EdgeInsets.only(top: 24),
-            child: ElevatedButton(
-              onPressed: concluirTarefa,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.check),
-                  Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Text(
-                      'Concluir Tarefa',
-                      style: TextStyle(fontSize: 20),
+            SizedBox(height: 20),
+            Text(
+              'Data: ${DateFormat('dd/MM/yyyy').format(widget.tarefa.data)}',
+              style: TextStyle(fontSize: 16),
+            ),
+            SizedBox(height: 20),
+            Form(
+              key: _form,
+              child: TextFormField(
+                controller: _valorDescricao,
+                style: const TextStyle(fontSize: 20),
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'Descrição da Conclusão',
+                  prefixIcon: Icon(Icons.keyboard),
+                ),
+                keyboardType: TextInputType.text,
+                validator: (value) {
+                  if (value!.isEmpty) {
+                    return 'Por favor, insira a descrição para concluir a tarefa';
+                  } else {
+                    return null;
+                  }
+                },
+              ),
+            ),
+            Container(
+              alignment: Alignment.bottomCenter,
+              margin: EdgeInsets.only(top: 24),
+              child: ElevatedButton(
+                onPressed: concluirTarefa,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.check),
+                    Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Text(
+                        'Concluir Tarefa',
+                        style: TextStyle(fontSize: 20),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

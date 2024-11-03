@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 import '../models/tarefa.dart';
 import '../pages/tarefas_descricao_page.dart';
 import '../repositories/tarefas_favoritas_repository.dart';
@@ -14,11 +15,6 @@ class TarefaCard extends StatefulWidget {
 }
 
 class _TarefaCardState extends State<TarefaCard> {
-  static Map<String, Color> precoColor = <String, Color>{
-    'up': Colors.teal,
-    'down': Colors.indigo,
-  };
-
   abrirDetalhes() {
     Navigator.push(
       context,
@@ -39,10 +35,6 @@ class _TarefaCardState extends State<TarefaCard> {
           padding: EdgeInsets.only(top: 20, bottom: 20, left: 20),
           child: Row(
             children: [
-              Image.asset(
-                widget.tarefa.icone,
-                height: 40,
-              ),
               Expanded(
                 child: Container(
                   margin: EdgeInsets.only(left: 15),
@@ -57,7 +49,7 @@ class _TarefaCardState extends State<TarefaCard> {
                         ),
                       ),
                       Text(
-                        widget.tarefa.data,
+                        DateFormat('dd/MM/yyyy').format(widget.tarefa.data),
                         style: TextStyle(
                           fontSize: 13,
                           color: Colors.black54,
@@ -70,9 +62,9 @@ class _TarefaCardState extends State<TarefaCard> {
               Container(
                 padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                 decoration: BoxDecoration(
-                  color: precoColor['down']!.withOpacity(0.05),
+                  color: Colors.blue.withOpacity(0.05),
                   border: Border.all(
-                    color: precoColor['down']!.withOpacity(0.4),
+                    color: Colors.blue.withOpacity(0.4),
                   ),
                   borderRadius: BorderRadius.circular(100),
                 ),
@@ -80,7 +72,6 @@ class _TarefaCardState extends State<TarefaCard> {
                   widget.tarefa.status,
                   style: TextStyle(
                     fontSize: 14,
-                    //color: preColor['down'],
                     letterSpacing: -1,
                   ),
                 ),

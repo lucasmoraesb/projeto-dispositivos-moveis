@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../repositories/tarefas_favoritas_repository.dart';
 import '../models/tarefa.dart';
@@ -20,7 +21,7 @@ class _TarefasPageState extends State<TarefasPage> {
     if (selecionadas.isEmpty) {
       return AppBar(
         centerTitle: true,
-        title: const Text('AppBar_0'),
+        title: const Text('Minhas tarefas'),
         actions: [
           IconButton(
             onPressed: () => {}, // Precisa Implementar
@@ -31,7 +32,7 @@ class _TarefasPageState extends State<TarefasPage> {
           ),
         ],
         elevation: 2,
-        backgroundColor: const Color(0xcaf4e733),
+        backgroundColor: Colors.blue.shade900,
       );
     } else {
       return AppBar(
@@ -59,7 +60,6 @@ class _TarefasPageState extends State<TarefasPage> {
             },
             icon: const Icon(
               Icons.star,
-              color: Colors.yellow,
               size: 25,
             ),
           ),
@@ -114,27 +114,29 @@ class _TarefasPageState extends State<TarefasPage> {
                 ? const CircleAvatar(
                     child: Icon(Icons.check),
                   )
-                : SizedBox(
-                    width: 25,
-                    height: 25,
-                    child: Image.asset(
-                      tabela[tarefa].icone,
+                : CircleAvatar(
+                    child: Icon(
+                      tabela[tarefa].status == 'Concluído'
+                          ? Icons.check_circle
+                          : Icons.circle,
                     ),
                   ),
             title: Row(
               children: [
-                Text(
-                  tabela[tarefa].nome,
-                  style: const TextStyle(
-                    fontSize: 25,
+                Expanded(
+                  child: Text(
+                    tabela[tarefa].nome,
+                    style: const TextStyle(
+                      fontSize: 25,
+                    ),
                   ),
                 ),
                 if (favoritas.lista.contains(tabela[tarefa]))
-                  Icon(Icons.circle, color: Colors.amber, size: 8),
+                  Icon(Icons.star, color: Colors.amber, size: 25),
               ],
             ),
             trailing: Text(
-              tabela[tarefa].data,
+              DateFormat('dd/MM/yyyy').format(tabela[tarefa].data),
               style: const TextStyle(
                 fontSize: 15,
               ),
@@ -166,6 +168,7 @@ class _TarefasPageState extends State<TarefasPage> {
       floatingActionButton: Align(
         alignment: Alignment.bottomCenter,
         child: FloatingActionButton(
+          backgroundColor: Colors.blue.shade900,
           onPressed: () {
             Navigator.push(
               context,
