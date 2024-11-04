@@ -1,14 +1,11 @@
 class Tarefa {
   String nome;
-  String icone;
-  String data; // formato esperado "ano-mês-dia" ""1984–04–02"
+  DateTime data;
   String descricao;
-  String status =
-      'Não iniciado'; // !!!!!!!! ALTERAR DEPOIS (DEIXAR DINAMICO)!!!!!!!!!!!!!!!
+  String status = 'Não concluída';
 
   Tarefa({
     required this.nome,
-    required this.icone,
     required this.data,
     required this.descricao,
   });

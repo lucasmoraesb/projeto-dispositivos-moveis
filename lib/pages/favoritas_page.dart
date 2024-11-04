@@ -16,17 +16,16 @@ class _FavoritasPageState extends State<FavoritasPage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text('Tarefas favoritadas'),
+        title: const Text('Tarefas favoritadas'),
+        backgroundColor: Colors.blue.shade800,
       ),
       body: Container(
         height: MediaQuery.of(context).size.height,
-        padding: EdgeInsets.all(12),
-        /*child: ,
-        ),*/
+        padding: const EdgeInsets.all(12),
         child: Consumer<TarefasFavoritasRepository>(
           builder: (context, favoritas, child) {
             return favoritas.lista.isEmpty
-                ? ListTile(
+                ? const ListTile(
                     leading: Icon(Icons.star),
                     title: Text('Sem tarefas favoritadas'),
                   )
