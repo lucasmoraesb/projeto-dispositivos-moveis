@@ -4,10 +4,11 @@ import '../repositories/tarefas_favoritas_repository.dart';
 import '../models/tarefa.dart';
 import '../repositories/tarefas_repository.dart';
 import '../pages/tarefas_descricao_page.dart';
-//import 'package:intl/intl.dart';
+import 'package:intl/intl.dart';
 
 class TarefasPage extends StatefulWidget {
   const TarefasPage({super.key});
+
   @override
   State<TarefasPage> createState() => _TarefasPageState();
 }
@@ -80,11 +81,33 @@ class _TarefasPageState extends State<TarefasPage> {
     });
   }
 
+  sortData(tabela) {
+    tabela.sort((Tarefa a, Tarefa b) => a.data.compareTo(b.data));
+  }
+
+  formatarData(data) {
+    var formatter = DateFormat('dd-MM-yyyy');
+    return formatter.format(data);
+  }
+
   @override
   Widget build(BuildContext context) {
     favoritas = Provider.of<TarefasFavoritasRepository>(context);
     //favoritas = context.watch<TarefasFavoritasRepository>();
-    final tabela = TarefasRepository.tabela;
+    List<Tarefa> tabela = TarefasRepository.tabela;
+    sortData(tabela);
+
+    /*  Teste de criação de nova tarefa na Tebela, pela própria "tarefas_page"
+    Tarefa tarefinha = Tarefa(
+      nome: 'teste9[3]',
+      icone: 'images/symbol_ok.png',
+      data: DateTime(2024, 11, 5),
+      descricao: 'É isso Pessoal',
+    );
+
+    tabela.add(tarefinha);
+    */
+    //favoritas.sort();
 
     return Scaffold(
       appBar: appBarDinamica(),
@@ -119,7 +142,7 @@ class _TarefasPageState extends State<TarefasPage> {
                 ],
               ),
               trailing: Text(
-                tabela[tarefa].data,
+                formatarData(tabela[tarefa].data),
                 style: const TextStyle(
                   fontSize: 15,
                 ),

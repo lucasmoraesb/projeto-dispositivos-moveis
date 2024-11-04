@@ -34,7 +34,7 @@ class _TarefasDescricaoPageState extends State<TarefasDescricaoPage> {
       body: Column(
         children: [
           Text(widget.tarefa.descricao),
-          Text(widget.tarefa.data),
+          Text(widget.tarefa.data.toString()),
           Form(
             key: _form,
             child: TextFormField(

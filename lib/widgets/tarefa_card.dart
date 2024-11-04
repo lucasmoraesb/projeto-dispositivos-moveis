@@ -57,7 +57,7 @@ class _TarefaCardState extends State<TarefaCard> {
                         ),
                       ),
                       Text(
-                        widget.tarefa.data,
+                        widget.tarefa.data.toString(),
                         style: TextStyle(
                           fontSize: 13,
                           color: Colors.black54,
