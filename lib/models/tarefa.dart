@@ -1,10 +1,8 @@
-import 'package:flutter/material.dart';
-
 class Tarefa {
   String nome;
   DateTime data;
   String descricao;
-  String status = 'Não iniciado';
+  String status = 'Não concluída';
 
   Tarefa({
     required this.nome,

@@ -9,8 +9,13 @@ class TarefasFavoritasRepository extends ChangeNotifier {
   saveAll(List<Tarefa> tarefas) {
     for (var tarefa in tarefas) {
       if (!_lista.contains(tarefa)) _lista.add(tarefa);
+      sortLista();
     }
     notifyListeners();
+  }
+
+  sortLista() {
+    _lista.sort((Tarefa a, Tarefa b) => a.data.compareTo(b.data));
   }
 
   remove(Tarefa tarefa) {

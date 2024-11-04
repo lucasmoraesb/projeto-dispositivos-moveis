@@ -39,41 +39,26 @@ class _TarefasDescricaoPageState extends State<TarefasDescricaoPage> {
       appBar: AppBar(
         title: Text(widget.tarefa.nome),
       ),
-      body: Column(
-        children: [
-          Text(widget.tarefa.descricao),
-          Text(
-            DateFormat('dd/MM/yyyy').format(widget.tarefa.data),
-          ),
-          Form(
-            key: _form,
-            child: TextFormField(
-              controller: _valorDescricao,
-              style: const TextStyle(fontSize: 20),
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Descrição',
-                prefixIcon: Icon(Icons.keyboard),
-                suffix: Text(
-                  'sufixo',
-                  style: TextStyle(fontSize: 15),
-                ),
-              ),
-              keyboardType: TextInputType.text,
-              validator: (value) {
-                if (value!.isEmpty) {
-                  return 'Escreva algum texto';
-                } else {
-                  return null;
-                }
-              },
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Descrição:',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 10),
+            Text(
+              widget.tarefa.descricao,
+              style: const TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 20),
             Text(
               'Data: ${DateFormat('dd/MM/yyyy').format(widget.tarefa.data)}',
-              style: TextStyle(fontSize: 16),
+              style: const TextStyle(fontSize: 16),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Form(
               key: _form,
               child: TextFormField(
@@ -94,21 +79,21 @@ class _TarefasDescricaoPageState extends State<TarefasDescricaoPage> {
                 },
               ),
             ),
-          ), // Insercao somente de numeros
-          Container(
-            alignment: Alignment.bottomCenter,
-            margin: const EdgeInsets.only(top: 24),
-            child: ElevatedButton(
-              onPressed: concluirTarefa,
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.check),
-                  Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Text(
-                      'Concluir Tarefa',
-                      style: TextStyle(fontSize: 20),
+            Container(
+              alignment: Alignment.bottomCenter,
+              margin: const EdgeInsets.only(top: 24),
+              child: ElevatedButton(
+                onPressed: concluirTarefa,
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.check),
+                    Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Text(
+                        'Concluir Tarefa',
+                        style: TextStyle(fontSize: 20),
+                      ),
                     ),
                   ],
                 ),

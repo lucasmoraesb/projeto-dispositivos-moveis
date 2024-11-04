@@ -6,7 +6,6 @@ import '../models/tarefa.dart';
 import '../repositories/tarefas_repository.dart';
 import '../pages/tarefas_descricao_page.dart';
 import '../pages/NovaTarefaPage.dart';
-import 'package:intl/intl.dart';
 
 class TarefasPage extends StatefulWidget {
   const TarefasPage({super.key});
@@ -103,7 +102,8 @@ class _TarefasPageState extends State<TarefasPage> {
     setState(() {
       TarefasRepository.tabela.remove(tarefa);
     });
-    
+  }
+
   sortData(tabela) {
     tabela.sort((Tarefa a, Tarefa b) => a.data.compareTo(b.data));
   }
@@ -134,7 +134,7 @@ class _TarefasPageState extends State<TarefasPage> {
         itemBuilder: (BuildContext context, int index) {
           final tarefa = tabela[index];
           return Card(
-            margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+            margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
             child: Column(
               children: [
                 ListTile(
@@ -163,7 +163,7 @@ class _TarefasPageState extends State<TarefasPage> {
                         ),
                       ),
                       if (favoritas.lista.contains(tarefa))
-                        Icon(Icons.star, color: Colors.amber, size: 25),
+                        const Icon(Icons.star, color: Colors.amber, size: 25),
                     ],
                   ),
                   trailing: Text(
@@ -172,39 +172,64 @@ class _TarefasPageState extends State<TarefasPage> {
                       fontSize: 15,
                     ),
                   ),
-                  if (favoritas.lista.contains(tabela[tarefa]))
-                    const Icon(Icons.circle, color: Colors.amber, size: 8),
-                ],
-              ),
-              trailing: Text(
-                DateFormat('dd/MM/yyyy').format(tabela[tarefa].data),
-                style: const TextStyle(
-                  fontSize: 15,
+                  selected: selecionadas.contains(tarefa),
+                  selectedTileColor: const Color(0xff4a61e7),
+                  onLongPress: () {
+                    setState(() {
+                      (selecionadas.contains(tarefa))
+                          ? selecionadas.remove(tarefa)
+                          : selecionadas.add(tarefa);
+                    });
+                  },
+                  onTap: () {
+                    selecionadas.isEmpty
+                        ? mostrarDetalhes(tarefa)
+                        : setState(() {
+                            (selecionadas.contains(tarefa))
+                                ? selecionadas.remove(tarefa)
+                                : selecionadas.add(tarefa);
+                          });
+                  },
                 ),
-              ),
-
-              //tileColor: Color(0xefbebdbd),
-              selected: selecionadas.contains(tabela[tarefa]),
-              selectedTileColor: const Color(0xff4a61e7),
-              onLongPress: () {
-                setState(() {
-                  (selecionadas.contains(tabela[tarefa]))
-                      ? selecionadas.remove(tabela[tarefa])
-                      : selecionadas.add(tabela[tarefa]);
-                });
-              },
-              onTap: () {
-                selecionadas.isEmpty
-                    ? mostrarDetalhes(tabela[tarefa])
-                    : setState(() {
-                        (selecionadas.contains(tabela[tarefa]))
-                            ? selecionadas.remove(tabela[tarefa])
-                            : selecionadas.add(tabela[tarefa]);
-                      });
-              },
+                if (tarefa.status == 'Concluído')
+                  Padding(
+                    padding: const EdgeInsets.only(
+                        left: 16.0, right: 16.0, bottom: 8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            tarefa.descricao,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: Colors.black54,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: () => excluirTarefa(tarefa),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          );
+        },
+      ),
+      floatingActionButton: Align(
+        alignment: Alignment.bottomCenter,
+        child: FloatingActionButton(
+          backgroundColor: Colors.blue.shade900,
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => NovaTarefaPage()),
             );
           },
-          child: Icon(Icons.add),
+          child: const Icon(Icons.add),
         ),
       ),
     );

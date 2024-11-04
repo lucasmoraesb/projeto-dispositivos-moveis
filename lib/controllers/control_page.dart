@@ -34,8 +34,8 @@ class _ControlPageState extends State<ControlPage> {
         controller: pc,
         onPageChanged: setPaginaAtual,
         children: const [
-          CalendarScreen(), // Página de calendário
           HomePage(),
+          CalendarScreen(), // Página de calendário
           TarefasPage(),
           FavoritasPage(),
         ],
@@ -45,9 +45,9 @@ class _ControlPageState extends State<ControlPage> {
         selectedItemColor: Colors.indigo,
         unselectedItemColor: Colors.grey,
         items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(
               icon: Icon(Icons.calendar_today), label: 'Calendário'),
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.list), label: 'Todas'),
           BottomNavigationBarItem(icon: Icon(Icons.star), label: 'Favoritas'),
         ],
