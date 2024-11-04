@@ -4,7 +4,7 @@ import '../repositories/tarefas_favoritas_repository.dart';
 import '../models/tarefa.dart';
 import '../repositories/tarefas_repository.dart';
 import '../pages/tarefas_descricao_page.dart';
-//import 'package:intl/intl.dart';
+import 'package:intl/intl.dart';
 
 class TarefasPage extends StatefulWidget {
   const TarefasPage({super.key});
@@ -115,15 +115,16 @@ class _TarefasPageState extends State<TarefasPage> {
                     ),
                   ),
                   if (favoritas.lista.contains(tabela[tarefa]))
-                    Icon(Icons.circle, color: Colors.amber, size: 8),
+                    const Icon(Icons.circle, color: Colors.amber, size: 8),
                 ],
               ),
               trailing: Text(
-                tabela[tarefa].data,
+                DateFormat('dd/MM/yyyy').format(tabela[tarefa].data),
                 style: const TextStyle(
                   fontSize: 15,
                 ),
               ),
+
               //tileColor: Color(0xefbebdbd),
               selected: selecionadas.contains(tabela[tarefa]),
               selectedTileColor: const Color(0xff4a61e7),
