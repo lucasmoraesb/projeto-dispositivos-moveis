@@ -14,16 +14,23 @@ class TarefasDescricaoPage extends StatefulWidget {
 class _TarefasDescricaoPageState extends State<TarefasDescricaoPage> {
   final _form = GlobalKey<FormState>();
   final _valorDescricao = TextEditingController();
-  //final _valorData = TextEditingController();
 
   concluirTarefa() {
     if (_form.currentState!.validate()) {
-      // Mudar status para completo
-
+      setState(() {
+        widget.tarefa.status = 'Concluído';
+        widget.tarefa.descricao = _valorDescricao.text;
+      });
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Tarefa completada com sucesso')));
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Não inicializamos o campo de texto com a descrição da tarefa
   }
 
   @override
@@ -55,33 +62,39 @@ class _TarefasDescricaoPageState extends State<TarefasDescricaoPage> {
               keyboardType: TextInputType.text,
               validator: (value) {
                 if (value!.isEmpty) {
-                  return 'forme o Texto ##TESTE##';
+                  return 'Escreva algum texto';
                 } else {
                   return null;
                 }
               },
             ),
-          ),
-          /*Form(
-            key: _form,
-            child: TextFormField(
-              controller: _valorData,
-              style: const TextStyle(fontSize: 20),
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Descrição',
-                prefixIcon: Icon(Icons.keyboard),
-                suffix: Text(
-                  'sufixo',
-                  style: TextStyle(fontSize: 15),
-                ),
-              ),
-              keyboardType: TextInputType.datetime,
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-              ],
+            SizedBox(height: 20),
+            Text(
+              'Data: ${DateFormat('dd/MM/yyyy').format(widget.tarefa.data)}',
+              style: TextStyle(fontSize: 16),
             ),
-          ),*/ // Insercao somente de numeros
+            SizedBox(height: 20),
+            Form(
+              key: _form,
+              child: TextFormField(
+                controller: _valorDescricao,
+                style: const TextStyle(fontSize: 20),
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'Descrição da Conclusão',
+                  prefixIcon: Icon(Icons.keyboard),
+                ),
+                keyboardType: TextInputType.text,
+                validator: (value) {
+                  if (value!.isEmpty) {
+                    return 'Por favor, insira a descrição para concluir a tarefa';
+                  } else {
+                    return null;
+                  }
+                },
+              ),
+            ),
+          ), // Insercao somente de numeros
           Container(
             alignment: Alignment.bottomCenter,
             margin: const EdgeInsets.only(top: 24),
@@ -97,12 +110,12 @@ class _TarefasDescricaoPageState extends State<TarefasDescricaoPage> {
                       'Concluir Tarefa',
                       style: TextStyle(fontSize: 20),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -80,6 +80,48 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  List<Widget> _buildDaysOfMonth() {
+    final DateTime now = DateTime.now();
+    final int daysInMonth = DateTime(now.year, now.month + 1, 0).day;
+    List<Widget> days = [];
+    for (int i = 1; i <= daysInMonth; i++) {
+      DateTime date = DateTime(now.year, now.month, i);
+      String dayAbbreviation = DateFormat('E').format(date);
+      days.add(
+        Column(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              alignment: Alignment.center,
+              margin: EdgeInsets.symmetric(horizontal: 4),
+              decoration: BoxDecoration(
+                color: i == now.day ? Colors.blue : Colors.grey[200],
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                i.toString(),
+                style: TextStyle(
+                  color: i == now.day ? Colors.white : Colors.black,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            SizedBox(height: 4),
+            Text(
+              dayAbbreviation,
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.black,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+    return days;
+  }
+
   @override
   Widget build(BuildContext context) {
     favoritas = Provider.of<TarefasFavoritasRepository>(context);
