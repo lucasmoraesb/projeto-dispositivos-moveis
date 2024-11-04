@@ -19,6 +19,12 @@ class TarefasRepository extends ChangeNotifier {
     Tarefa(
       nome: 'teste1[2]',
       icone: 'images/symbol_ok.png',
+      data: DateTime(2025, 10, 3),
+      descricao: 'talvez eu tenha algo para descrever',
+    ),
+    Tarefa(
+      nome: 'Teste Home',
+      icone: 'images/symbol_ok.png',
       data: DateTime(2025, 10, 03),
       descricao: 'talvez eu tenha algo para descrever',
     ),

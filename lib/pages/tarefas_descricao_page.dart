@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/tarefa.dart';
+import 'package:intl/intl.dart';
 
 class TarefasDescricaoPage extends StatefulWidget {
   final Tarefa tarefa;
@@ -21,7 +22,7 @@ class _TarefasDescricaoPageState extends State<TarefasDescricaoPage> {
 
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Tarefa completada com sucesso')));
+          const SnackBar(content: Text('Tarefa completada com sucesso')));
     }
   }
 
@@ -34,7 +35,9 @@ class _TarefasDescricaoPageState extends State<TarefasDescricaoPage> {
       body: Column(
         children: [
           Text(widget.tarefa.descricao),
-          Text(widget.tarefa.data.toString()),
+          Text(
+            DateFormat('dd/MM/yyyy').format(widget.tarefa.data),
+          ),
           Form(
             key: _form,
             child: TextFormField(
@@ -81,10 +84,10 @@ class _TarefasDescricaoPageState extends State<TarefasDescricaoPage> {
           ),*/ // Insercao somente de numeros
           Container(
             alignment: Alignment.bottomCenter,
-            margin: EdgeInsets.only(top: 24),
+            margin: const EdgeInsets.only(top: 24),
             child: ElevatedButton(
               onPressed: concluirTarefa,
-              child: Row(
+              child: const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.check),

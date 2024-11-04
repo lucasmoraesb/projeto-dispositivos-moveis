@@ -85,11 +85,6 @@ class _TarefasPageState extends State<TarefasPage> {
     tabela.sort((Tarefa a, Tarefa b) => a.data.compareTo(b.data));
   }
 
-  formatarData(data) {
-    var formatter = DateFormat('dd-MM-yyyy');
-    return formatter.format(data);
-  }
-
   @override
   Widget build(BuildContext context) {
     favoritas = Provider.of<TarefasFavoritasRepository>(context);
@@ -138,15 +133,16 @@ class _TarefasPageState extends State<TarefasPage> {
                     ),
                   ),
                   if (favoritas.lista.contains(tabela[tarefa]))
-                    Icon(Icons.circle, color: Colors.amber, size: 8),
+                    const Icon(Icons.circle, color: Colors.amber, size: 8),
                 ],
               ),
               trailing: Text(
-                formatarData(tabela[tarefa].data),
+                DateFormat('dd/MM/yyyy').format(tabela[tarefa].data),
                 style: const TextStyle(
                   fontSize: 15,
                 ),
               ),
+
               //tileColor: Color(0xefbebdbd),
               selected: selecionadas.contains(tabela[tarefa]),
               selectedTileColor: const Color(0xff4a61e7),
