@@ -4,14 +4,14 @@ import '../pages/favoritas_page.dart';
 import '../pages/tarefas_page.dart';
 import '../pages/home_page.dart';
 
-class ControlPage extends StatefulWidget {
-  const ControlPage({super.key});
+class PaginasController extends StatefulWidget {
+  const PaginasController({super.key});
 
   @override
-  State<ControlPage> createState() => _ControlPageState();
+  State<PaginasController> createState() => _PaginasControllerState();
 }
 
-class _ControlPageState extends State<ControlPage> {
+class _PaginasControllerState extends State<PaginasController> {
   int paginaAtual = 0;
   late PageController pc;
 
@@ -35,7 +35,7 @@ class _ControlPageState extends State<ControlPage> {
         onPageChanged: setPaginaAtual,
         children: const [
           HomePage(),
-          CalendarScreen(), // Página de calendário
+          CalendarioPage(), // Página de calendário
           TarefasPage(),
           FavoritasPage(),
         ],

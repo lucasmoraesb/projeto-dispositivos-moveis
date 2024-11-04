@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'controllers/control_page.dart';
+import 'controllers/paginas_controller.dart';
 
 class App extends StatelessWidget {
   const App({super.key});
@@ -9,13 +9,14 @@ class App extends StatelessWidget {
     return MaterialApp(
       title: 'The Material App',
       theme: ThemeData(
-        // nao funciona
-        appBarTheme: const AppBarTheme(color: Colors.indigo),
+        appBarTheme: const AppBarTheme(
+          color: Colors.indigo,
+          elevation: 2,
+          centerTitle: true,
+        ),
         scaffoldBackgroundColor: const Color.fromARGB(255, 228, 228, 228),
-        //primarySwatch: Colors.indigo, // nao funciona
-      ), // nao funciona
-
-      home: const ControlPage(),
+      ),
+      home: const PaginasController(),
     );
   }
 }

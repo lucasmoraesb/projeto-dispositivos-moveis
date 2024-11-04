@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/tarefa.dart';
 import '../repositories/tarefas_repository.dart';
 
@@ -11,6 +12,7 @@ class _NovaTarefaPageState extends State<NovaTarefaPage> {
   final _formKey = GlobalKey<FormState>();
   final _nomeController = TextEditingController();
   final _descricaoController = TextEditingController();
+  late TarefasRepository tarefas;
   DateTime? _dataSelecionada;
 
   _selecionarData(BuildContext context) async {
@@ -29,9 +31,10 @@ class _NovaTarefaPageState extends State<NovaTarefaPage> {
 
   @override
   Widget build(BuildContext context) {
+    //tarefas = Provider.of<TarefasRepository>(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text('Nova Tarefa'),
+        title: const Text('Nova Tarefa'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -41,7 +44,7 @@ class _NovaTarefaPageState extends State<NovaTarefaPage> {
             children: [
               TextFormField(
                 controller: _nomeController,
-                decoration: InputDecoration(labelText: 'Nome'),
+                decoration: const InputDecoration(labelText: 'Nome'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Por favor, insira o nome';
@@ -51,7 +54,7 @@ class _NovaTarefaPageState extends State<NovaTarefaPage> {
               ),
               TextFormField(
                 controller: _descricaoController,
-                decoration: InputDecoration(labelText: 'Descrição'),
+                decoration: const InputDecoration(labelText: 'Descrição'),
                 maxLines: 5,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -60,7 +63,7 @@ class _NovaTarefaPageState extends State<NovaTarefaPage> {
                   return null;
                 },
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Row(
                 children: [
                   Text(
@@ -68,14 +71,14 @@ class _NovaTarefaPageState extends State<NovaTarefaPage> {
                         ? 'Nenhuma data selecionada'
                         : 'Data: ${_dataSelecionada!.toLocal()}'.split(' ')[0],
                   ),
-                  SizedBox(width: 20),
+                  const SizedBox(width: 20),
                   ElevatedButton(
                     onPressed: () => _selecionarData(context),
-                    child: Text('Selecionar Data'),
+                    child: const Text('Selecionar Data'),
                   ),
                 ],
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate() &&
@@ -85,11 +88,14 @@ class _NovaTarefaPageState extends State<NovaTarefaPage> {
                       data: _dataSelecionada!,
                       descricao: _descricaoController.text,
                     );
-                    TarefasRepository.tabela.add(novaTarefa);
+                    setState(() {
+                      //tarefas.addTarefa(novaTarefa);
+                      TarefasRepository.tabela.add(novaTarefa);
+                    });
                     Navigator.pop(context);
                   }
                 },
-                child: Text('Criar Tarefa'),
+                child: const Text('Criar Tarefa'),
               ),
             ],
           ),

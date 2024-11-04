@@ -5,7 +5,7 @@ import '../repositories/tarefas_favoritas_repository.dart';
 import '../models/tarefa.dart';
 import '../repositories/tarefas_repository.dart';
 import '../pages/tarefas_descricao_page.dart';
-import '../pages/NovaTarefaPage.dart';
+import '../pages/nova_tarefa_page.dart';
 
 class TarefasPage extends StatefulWidget {
   const TarefasPage({super.key});
@@ -17,12 +17,15 @@ class TarefasPage extends StatefulWidget {
 class _TarefasPageState extends State<TarefasPage> {
   List<Tarefa> selecionadas = [];
   late TarefasFavoritasRepository favoritas;
+  late TarefasRepository tarefasRepo;
 
   appBarDinamica() {
     if (selecionadas.isEmpty) {
       return AppBar(
+        /*
         title: const Padding(
           padding: EdgeInsets.only(top: 20.0), // Adiciona padding-top
+          
           child: Text(
             'Minhas Tarefas',
             style: TextStyle(
@@ -31,14 +34,15 @@ class _TarefasPageState extends State<TarefasPage> {
               fontFamily: 'Roboto',
             ),
           ),
+        ),*/
+        centerTitle: true,
+        title: const Text('Minhas Tarefas'),
+        titleTextStyle: const TextStyle(
+          color: Colors.black87,
+          fontSize: 25,
         ),
         elevation: 2,
-        backgroundColor: Colors.blueGrey[50],
-        titleTextStyle: const TextStyle(
-          fontSize: 24,
-          fontWeight: FontWeight.w500,
-          fontFamily: 'Roboto',
-        ),
+        //backgroundColor: Colors.blueGrey[50],
         titleSpacing: 46, // Alinha o título à esquerda
       );
     } else {
@@ -52,7 +56,7 @@ class _TarefasPageState extends State<TarefasPage> {
           },
         ),
         centerTitle: true,
-        title: Text('Tarefas: ${selecionadas.length}'),
+        title: const Text('Tarefas selecionadas'),
         actions: [
           IconButton(
             onPressed: () {
@@ -72,7 +76,7 @@ class _TarefasPageState extends State<TarefasPage> {
             ),
           ),
         ],
-        backgroundColor: Colors.blueGrey[50],
+        //backgroundColor: Colors.blueGrey[50],
         elevation: 2,
         iconTheme: const IconThemeData(color: Colors.black87),
         titleTextStyle: const TextStyle(
@@ -101,6 +105,7 @@ class _TarefasPageState extends State<TarefasPage> {
   excluirTarefa(Tarefa tarefa) {
     setState(() {
       TarefasRepository.tabela.remove(tarefa);
+      //tarefas.remove(tarefa);
     });
   }
 
@@ -111,21 +116,10 @@ class _TarefasPageState extends State<TarefasPage> {
   @override
   Widget build(BuildContext context) {
     favoritas = Provider.of<TarefasFavoritasRepository>(context);
-    //favoritas = context.watch<TarefasFavoritasRepository>();
+    //tarefasRepo = Provider.of<TarefasRepository>(context);
+    //List<Tarefa> tabela = tarefas.getAll();
     List<Tarefa> tabela = TarefasRepository.tabela;
     sortData(tabela);
-
-    /*  Teste de criação de nova tarefa na Tebela, pela própria "tarefas_page"
-    Tarefa tarefinha = Tarefa(
-      nome: 'teste9[3]',
-      icone: 'images/symbol_ok.png',
-      data: DateTime(2024, 11, 5),
-      descricao: 'É isso Pessoal',
-    );
-
-    tabela.add(tarefinha);
-    */
-    //favoritas.sort();
 
     return Scaffold(
       appBar: appBarDinamica(),
@@ -219,17 +213,56 @@ class _TarefasPageState extends State<TarefasPage> {
           );
         },
       ),
-      floatingActionButton: Align(
-        alignment: Alignment.bottomCenter,
-        child: FloatingActionButton(
-          backgroundColor: Colors.blue.shade900,
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => NovaTarefaPage()),
-            );
-          },
-          child: const Icon(Icons.add),
+      //floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      //floatingBarDinamica();
+      floatingActionButton: /* selecionadas.isNotEmpty
+          ?  */
+          Align(
+        alignment: Alignment.bottomRight,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            selecionadas.isNotEmpty
+                ? FloatingActionButton.extended(
+                    icon: const Icon(Icons.delete),
+                    label: const Text(
+                      'Remover',
+                      style: TextStyle(
+                        letterSpacing: 0,
+                      ),
+                    ),
+                    onPressed: () {
+                      for (var tarefa in selecionadas) {
+                        if (selecionadas.contains(tarefa)) {
+                          try {
+                            tabela.remove(tarefa);
+                          } catch (e) {
+                            throw 'Erro ao remover tarefa';
+                          }
+                        }
+                      }
+                      limparSelecionadas();
+                    },
+                  ) /* , */
+                : const SizedBox(width: 0),
+            //foregroundColor: const Color.fromARGB(255, 248, 8, 8),
+            const SizedBox(width: 120),
+            FloatingActionButton.extended(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => NovaTarefaPage()),
+                );
+              },
+              icon: const Icon(Icons.add),
+              label: const Text(
+                'Criar Tarefa',
+                style: TextStyle(
+                  letterSpacing: 0,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

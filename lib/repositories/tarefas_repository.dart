@@ -32,21 +32,37 @@ class TarefasRepository extends ChangeNotifier {
       data: DateTime(2024, 11, 05),
       descricao: 'talvez eu tenha algo para descrever',
     ),
+      data: DateTime(2024, 11, 4),
+      descricao: 'ABC',
+    ),
   ];
-  /*
-  adicionarTarefa(){
 
-  }*/
-/*
-  List<Tarefa> pegarDados() => tabela;
+  addTarefa(Tarefa tarefa) {
+    tabela.add(tarefa);
+    notifyListeners();
+  }
+
+  remove(Tarefa tarefa) {
+    tabela.remove(tarefa);
+    notifyListeners();
+  }
 
   sortData() {
-    if (isSorted) {
-      return tabela;
-    } else {
-      isSorted = false;
-      return tabela.sort((Tarefa a, Tarefa b) => a.data.compareTo(b.data));
+    tabela.sort((Tarefa a, Tarefa b) => a.data.compareTo(b.data));
+    notifyListeners();
+  }
+
+  getAll() {
+    return tabela;
+  }
+
+  getData(Tarefa tarefaBuscada, DateTime data) {
+    for (var tarefa in tabela) {
+      if (tarefa == tarefaBuscada) {
+        return tarefa.data.year == data.year &&
+            tarefa.data.month == data.month &&
+            tarefa.data.day == data.day;
+      }
     }
-    //tabela.sort((Tarefa a, Tarefa b) => a.data.compareTo(b.data));
-  }*/
+  }
 }

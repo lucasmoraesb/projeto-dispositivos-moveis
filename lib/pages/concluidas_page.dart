@@ -12,7 +12,7 @@ class _ConcluidasPageState extends State<ConcluidasPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Tarefas concluídas'),
+        title: const Text('Tarefas concluídas'),
       ),
     );
   }

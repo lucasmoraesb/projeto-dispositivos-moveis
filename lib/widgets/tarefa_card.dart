@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 import '../models/tarefa.dart';
 import '../pages/tarefas_descricao_page.dart';
 import '../repositories/tarefas_favoritas_repository.dart';
-import 'package:intl/intl.dart';
 
 class TarefaCard extends StatefulWidget {
   Tarefa tarefa;
