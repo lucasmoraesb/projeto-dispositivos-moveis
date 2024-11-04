@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'pages/home_page.dart';
+import 'controllers/control_page.dart';
 
 class App extends StatelessWidget {
   const App({super.key});
@@ -11,11 +11,11 @@ class App extends StatelessWidget {
       theme: ThemeData(
         // nao funciona
         appBarTheme: const AppBarTheme(color: Colors.indigo),
-        scaffoldBackgroundColor: Color.fromARGB(255, 228, 228, 228),
+        scaffoldBackgroundColor: const Color.fromARGB(255, 228, 228, 228),
         //primarySwatch: Colors.indigo, // nao funciona
       ), // nao funciona
 
-      home: const HomePage(),
+      home: const ControlPage(),
     );
   }
 }

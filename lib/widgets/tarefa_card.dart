@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../models/tarefa.dart';
 import '../pages/tarefas_descricao_page.dart';
 import '../repositories/tarefas_favoritas_repository.dart';
+import 'package:intl/intl.dart';
 
 class TarefaCard extends StatefulWidget {
   Tarefa tarefa;
@@ -27,30 +28,30 @@ class _TarefaCardState extends State<TarefaCard> {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: EdgeInsets.only(top: 12),
+      margin: const EdgeInsets.only(top: 12),
       elevation: 2,
       child: InkWell(
         onTap: () => abrirDetalhes(),
         child: Padding(
-          padding: EdgeInsets.only(top: 20, bottom: 20, left: 20),
+          padding: const EdgeInsets.only(top: 20, bottom: 20, left: 20),
           child: Row(
             children: [
               Expanded(
                 child: Container(
-                  margin: EdgeInsets.only(left: 15),
+                  margin: const EdgeInsets.only(left: 15),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         widget.tarefa.nome,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 18,
                           color: Colors.black87,
                         ),
                       ),
                       Text(
                         DateFormat('dd/MM/yyyy').format(widget.tarefa.data),
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 13,
                           color: Colors.black54,
                         ),
@@ -60,7 +61,8 @@ class _TarefaCardState extends State<TarefaCard> {
                 ),
               ),
               Container(
-                padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                 decoration: BoxDecoration(
                   color: Colors.blue.withOpacity(0.05),
                   border: Border.all(
@@ -70,18 +72,18 @@ class _TarefaCardState extends State<TarefaCard> {
                 ),
                 child: Text(
                   widget.tarefa.status,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 14,
                     letterSpacing: -1,
                   ),
                 ),
               ),
               PopupMenuButton(
-                icon: Icon(Icons.more_vert),
+                icon: const Icon(Icons.more_vert),
                 itemBuilder: (context) => [
                   PopupMenuItem(
                       child: ListTile(
-                    title: Text('Desfavoritar'),
+                    title: const Text('Desfavoritar'),
                     onTap: () {
                       Navigator.pop(context);
                       Provider.of<TarefasFavoritasRepository>(context,

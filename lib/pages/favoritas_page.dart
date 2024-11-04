@@ -22,8 +22,6 @@ class _FavoritasPageState extends State<FavoritasPage> {
       body: Container(
         height: MediaQuery.of(context).size.height,
         padding: EdgeInsets.all(12),
-        /*child: ,
-        ),*/
         child: Consumer<TarefasFavoritasRepository>(
           builder: (context, favoritas, child) {
             return favoritas.lista.isEmpty

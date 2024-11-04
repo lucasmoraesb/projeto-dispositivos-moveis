@@ -23,7 +23,7 @@ class _TarefasDescricaoPageState extends State<TarefasDescricaoPage> {
       });
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Tarefa completada com sucesso')));
+          const SnackBar(content: Text('Tarefa completada com sucesso')));
     }
   }
 
@@ -39,19 +39,34 @@ class _TarefasDescricaoPageState extends State<TarefasDescricaoPage> {
       appBar: AppBar(
         title: Text(widget.tarefa.nome),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Descrição:',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 10),
-            Text(
-              widget.tarefa.descricao,
-              style: TextStyle(fontSize: 16),
+      body: Column(
+        children: [
+          Text(widget.tarefa.descricao),
+          Text(
+            DateFormat('dd/MM/yyyy').format(widget.tarefa.data),
+          ),
+          Form(
+            key: _form,
+            child: TextFormField(
+              controller: _valorDescricao,
+              style: const TextStyle(fontSize: 20),
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Descrição',
+                prefixIcon: Icon(Icons.keyboard),
+                suffix: Text(
+                  'sufixo',
+                  style: TextStyle(fontSize: 15),
+                ),
+              ),
+              keyboardType: TextInputType.text,
+              validator: (value) {
+                if (value!.isEmpty) {
+                  return 'Escreva algum texto';
+                } else {
+                  return null;
+                }
+              },
             ),
             SizedBox(height: 20),
             Text(
@@ -79,21 +94,21 @@ class _TarefasDescricaoPageState extends State<TarefasDescricaoPage> {
                 },
               ),
             ),
-            Container(
-              alignment: Alignment.bottomCenter,
-              margin: EdgeInsets.only(top: 24),
-              child: ElevatedButton(
-                onPressed: concluirTarefa,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.check),
-                    Padding(
-                      padding: EdgeInsets.all(16),
-                      child: Text(
-                        'Concluir Tarefa',
-                        style: TextStyle(fontSize: 20),
-                      ),
+          ), // Insercao somente de numeros
+          Container(
+            alignment: Alignment.bottomCenter,
+            margin: const EdgeInsets.only(top: 24),
+            child: ElevatedButton(
+              onPressed: concluirTarefa,
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.check),
+                  Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Text(
+                      'Concluir Tarefa',
+                      style: TextStyle(fontSize: 20),
                     ),
                   ],
                 ),
