@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 
 class TarefasPage extends StatefulWidget {
   const TarefasPage({super.key});
+
   @override
   State<TarefasPage> createState() => _TarefasPageState();
 }
@@ -80,11 +81,28 @@ class _TarefasPageState extends State<TarefasPage> {
     });
   }
 
+  sortData(tabela) {
+    tabela.sort((Tarefa a, Tarefa b) => a.data.compareTo(b.data));
+  }
+
   @override
   Widget build(BuildContext context) {
     favoritas = Provider.of<TarefasFavoritasRepository>(context);
     //favoritas = context.watch<TarefasFavoritasRepository>();
-    final tabela = TarefasRepository.tabela;
+    List<Tarefa> tabela = TarefasRepository.tabela;
+    sortData(tabela);
+
+    /*  Teste de criação de nova tarefa na Tebela, pela própria "tarefas_page"
+    Tarefa tarefinha = Tarefa(
+      nome: 'teste9[3]',
+      icone: 'images/symbol_ok.png',
+      data: DateTime(2024, 11, 5),
+      descricao: 'É isso Pessoal',
+    );
+
+    tabela.add(tarefinha);
+    */
+    //favoritas.sort();
 
     return Scaffold(
       appBar: appBarDinamica(),
