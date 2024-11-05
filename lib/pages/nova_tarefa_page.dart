@@ -4,6 +4,8 @@ import '../models/tarefa.dart';
 import '../repositories/tarefas_repository.dart';
 
 class NovaTarefaPage extends StatefulWidget {
+  const NovaTarefaPage({super.key});
+
   @override
   _NovaTarefaPageState createState() => _NovaTarefaPageState();
 }
@@ -12,7 +14,6 @@ class _NovaTarefaPageState extends State<NovaTarefaPage> {
   final _formKey = GlobalKey<FormState>();
   final _nomeController = TextEditingController();
   final _descricaoController = TextEditingController();
-  late TarefasRepository tarefas;
   DateTime? _dataSelecionada;
 
   _selecionarData(BuildContext context) async {
@@ -31,7 +32,6 @@ class _NovaTarefaPageState extends State<NovaTarefaPage> {
 
   @override
   Widget build(BuildContext context) {
-    //tarefas = Provider.of<TarefasRepository>(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Nova Tarefa'),
@@ -88,11 +88,9 @@ class _NovaTarefaPageState extends State<NovaTarefaPage> {
                       data: _dataSelecionada!,
                       descricao: _descricaoController.text,
                     );
-                    setState(() {
-                      //tarefas.addTarefa(novaTarefa);
-                      TarefasRepository.tabela.add(novaTarefa);
-                    });
-                    Navigator.pop(context);
+
+                    // Retornar a nova tarefa para a página anterior
+                    Navigator.pop(context, novaTarefa);
                   }
                 },
                 child: const Text('Criar Tarefa'),

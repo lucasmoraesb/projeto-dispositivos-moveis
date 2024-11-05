@@ -22,19 +22,6 @@ class _TarefasPageState extends State<TarefasPage> {
   appBarDinamica() {
     if (selecionadas.isEmpty) {
       return AppBar(
-        /*
-        title: const Padding(
-          padding: EdgeInsets.only(top: 20.0), // Adiciona padding-top
-          
-          child: Text(
-            'Minhas Tarefas',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.w500,
-              fontFamily: 'Roboto',
-            ),
-          ),
-        ),*/
         centerTitle: true,
         title: const Text('Minhas Tarefas'),
         titleTextStyle: const TextStyle(
@@ -42,8 +29,6 @@ class _TarefasPageState extends State<TarefasPage> {
           fontSize: 25,
         ),
         elevation: 2,
-        //backgroundColor: Colors.blueGrey[50],
-        titleSpacing: 46, // Alinha o título à esquerda
       );
     } else {
       return AppBar(
@@ -76,7 +61,6 @@ class _TarefasPageState extends State<TarefasPage> {
             ),
           ),
         ],
-        //backgroundColor: Colors.blueGrey[50],
         elevation: 2,
         iconTheme: const IconThemeData(color: Colors.black87),
         titleTextStyle: const TextStyle(
@@ -102,10 +86,55 @@ class _TarefasPageState extends State<TarefasPage> {
     });
   }
 
+  void mostrarSnackBar(String mensagem) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(mensagem),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  void showAlertDialog2(
+      BuildContext context, List<Tarefa> selecionadas, Function onConfirm) {
+    Widget cancelaButton = TextButton(
+      child: const Text("Cancelar"),
+      onPressed: () {
+        Navigator.of(context).pop(); // Fecha o diálogo
+      },
+    );
+
+    Widget continuaButton = TextButton(
+      child: const Text("Continuar"),
+      onPressed: () {
+        onConfirm(); // Chama a função de confirmação
+        Navigator.of(context).pop(); // Fecha o diálogo
+      },
+    );
+
+    // Configura o AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: const Text("Confirmação"),
+      content: const Text("Deseja realmente excluir as tarefas selecionadas?"),
+      actions: [
+        cancelaButton,
+        continuaButton,
+      ],
+    );
+
+    // Exibe o diálogo
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+
   excluirTarefa(Tarefa tarefa) {
     setState(() {
       TarefasRepository.tabela.remove(tarefa);
-      //tarefas.remove(tarefa);
+      mostrarSnackBar('Tarefa excluída com sucesso!'); // Exibe o SnackBar aqui
     });
   }
 
@@ -116,8 +145,6 @@ class _TarefasPageState extends State<TarefasPage> {
   @override
   Widget build(BuildContext context) {
     favoritas = Provider.of<TarefasFavoritasRepository>(context);
-    //tarefasRepo = Provider.of<TarefasRepository>(context);
-    //List<Tarefa> tabela = tarefas.getAll();
     List<Tarefa> tabela = TarefasRepository.tabela;
     sortData(tabela);
 
@@ -213,7 +240,11 @@ class _TarefasPageState extends State<TarefasPage> {
                               IconButton(
                                 icon:
                                     const Icon(Icons.delete, color: Colors.red),
-                                onPressed: () => excluirTarefa(tarefa),
+                                onPressed: () {
+                                  excluirTarefa(tarefa);
+                                  mostrarSnackBar(
+                                      'Tarefa "${tarefa.nome}" excluída com sucesso!'); // Mensagem específica para a tarefa
+                                },
                               ),
                             ],
                           ),
@@ -223,11 +254,7 @@ class _TarefasPageState extends State<TarefasPage> {
                 );
               },
             ),
-      //floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      //floatingBarDinamica();
-      floatingActionButton: /* selecionadas.isNotEmpty
-          ?  */
-          Align(
+      floatingActionButton: Align(
         alignment: Alignment.bottomRight,
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -242,27 +269,55 @@ class _TarefasPageState extends State<TarefasPage> {
                       ),
                     ),
                     onPressed: () {
-                      for (var tarefa in selecionadas) {
-                        if (selecionadas.contains(tarefa)) {
-                          try {
-                            tabela.remove(tarefa);
-                          } catch (e) {
-                            throw 'Erro ao remover tarefa';
+                      if (selecionadas.isNotEmpty) {
+                        // Chama o diálogo de confirmação
+                        showAlertDialog2(context, selecionadas, () {
+                          int tarefasRemovidas =
+                              0; // Contador para tarefas removidas
+                          for (var tarefa in List.from(selecionadas)) {
+                            // Usar List.from para evitar modificar a lista durante a iteração
+                            if (tabela.contains(tarefa)) {
+                              tabela.remove(tarefa);
+                              tarefasRemovidas++;
+                            }
                           }
-                        }
+                          limparSelecionadas();
+
+                          // Exibir mensagem com o número de tarefas removidas
+                          mostrarSnackBar(
+                            '$tarefasRemovidas tarefa(s) removida(s) com sucesso!',
+                          );
+                        });
                       }
-                      limparSelecionadas();
                     },
-                  ) /* , */
+                  )
                 : const SizedBox(width: 0),
-            //foregroundColor: const Color.fromARGB(255, 248, 8, 8),
             const SizedBox(width: 120),
             FloatingActionButton.extended(
-              onPressed: () {
-                Navigator.push(
+              onPressed: () async {
+                // Navegar para NovaTarefaPage e aguardar o resultado
+                final novaTarefa = await Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => NovaTarefaPage()),
+                  MaterialPageRoute(
+                      builder: (context) => const NovaTarefaPage()),
                 );
+
+                // Se uma nova tarefa foi criada, atualize a tela
+                if (novaTarefa != null) {
+                  setState(() {
+                    // Adicione a nova tarefa à lista
+                    TarefasRepository.tabela.add(novaTarefa);
+                  });
+
+                  // Mostrar SnackBar informando que a tarefa foi criada
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                          'Tarefa "${novaTarefa.nome}" criada com sucesso!'),
+                      duration: const Duration(seconds: 2),
+                    ),
+                  );
+                }
               },
               icon: const Icon(Icons.add),
               label: const Text(
