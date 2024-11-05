@@ -42,7 +42,7 @@ class _ControlPageState extends State<ControlPage> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: paginaAtual,
-        selectedItemColor: Colors.indigo,
+        selectedItemColor: const Color(0xFF3787eb),
         unselectedItemColor: Colors.grey,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),

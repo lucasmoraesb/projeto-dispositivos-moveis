@@ -16,8 +16,9 @@ class _FavoritasPageState extends State<FavoritasPage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const Text('Tarefas favoritadas'),
-        backgroundColor: Colors.blue.shade800,
+        title: const Text('Tarefas favoritadas',
+            style: TextStyle(color: Color.fromARGB(255, 255, 255, 255))),
+        backgroundColor: const Color(0xFF3787eb),
       ),
       body: Container(
         height: MediaQuery.of(context).size.height,

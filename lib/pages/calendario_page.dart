@@ -19,7 +19,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Selecione uma Data")),
+      appBar: AppBar(
+        title: const Text("Selecione uma Data",
+            style: TextStyle(color: Color.fromARGB(255, 255, 255, 255))),
+        centerTitle: true,
+      ),
       body: Column(
         children: [
           TableCalendar(

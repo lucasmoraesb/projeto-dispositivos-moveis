@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
   @override
   State<HomePage> createState() => _HomePageState();
 }
@@ -20,18 +21,14 @@ class _HomePageState extends State<HomePage> {
     if (selecionadas.isEmpty) {
       return AppBar(
         centerTitle: true,
-        title: const Text('Home Page'),
+        title: const Text('Home Page',
+            style: TextStyle(color: Color.fromARGB(255, 255, 255, 255))),
         actions: [
           IconButton(
-            onPressed: () => {}, // Precisa Implementar
-            icon: const Icon(
-              Icons.swap_vert,
-              size: 30,
-            ),
+            onPressed: () => {}, // Implementar
+            icon: const Icon(Icons.swap_vert, size: 30),
           ),
         ],
-        elevation: 2,
-        backgroundColor: const Color(0xcaf4e733),
       );
     } else {
       return AppBar(
@@ -47,11 +44,8 @@ class _HomePageState extends State<HomePage> {
         title: Text('Quantidade: ${selecionadas.length}'),
         actions: [
           IconButton(
-            onPressed: () => {}, // Precisa Implementar o sort
-            icon: const Icon(
-              Icons.swap_vert,
-              size: 25,
-            ),
+            onPressed: () => {}, // Implementar sort
+            icon: const Icon(Icons.swap_vert, size: 25),
           ),
         ],
         backgroundColor: Colors.blueGrey[50],
@@ -96,79 +90,71 @@ class _HomePageState extends State<HomePage> {
       appBar: appBarDinamica(),
       body: Column(
         children: [
-          const Row(
-            children: [
-              Padding(
-                padding: EdgeInsets.fromLTRB(
-                    20, 20, 0, 10), // Caso deseje um espaçamento específico
-                child: Text(
-                  'Tarefas do dia',
-                  style: TextStyle(fontSize: 24),
-                ),
+          const Padding(
+            padding: EdgeInsets.fromLTRB(20, 20, 0, 10),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Tarefas do dia',
+                style: TextStyle(fontSize: 24),
               ),
-            ],
+            ),
           ),
           Expanded(
+            // Mantém o ListView dentro do espaço disponível
             child: ListView.separated(
-                itemBuilder: (BuildContext context, int index) {
-                  final tarefa = tarefasDoDia[index];
-                  return ListTile(
-                    shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(15)),
-                    ),
-                    leading: (selecionadas.contains(tarefa))
-                        ? const CircleAvatar(
-                            child: Icon(Icons.check),
-                          )
-                        : SizedBox(
-                            width: 25,
-                            height: 25,
-                            /*child: Image.asset( // @@@@ Arrumar Depois @@@@
-                              tarefa.icone,
-                            ),*/
-                          ),
-                    title: Row(
-                      children: [
-                        Text(
+              itemBuilder: (BuildContext context, int index) {
+                final tarefa = tarefasDoDia[index];
+                return ListTile(
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(15)),
+                  ),
+                  leading: (selecionadas.contains(tarefa))
+                      ? const CircleAvatar(child: Icon(Icons.check))
+                      : const SizedBox(width: 25, height: 25),
+                  title: Row(
+                    children: [
+                      Expanded(
+                        // Permite que o texto se expanda corretamente
+                        child: Text(
                           tarefa.nome,
-                          style: const TextStyle(
-                            fontSize: 25,
-                          ),
+                          style: const TextStyle(fontSize: 25),
+                          overflow: TextOverflow
+                              .ellipsis, // Para evitar overflow no texto
+                          maxLines: 1, // Limita a uma linha
                         ),
-                        if (favoritas.lista.contains(tarefa))
-                          const Icon(Icons.circle,
-                              color: Colors.amber, size: 8),
-                      ],
-                    ),
-                    trailing: Text(
-                      DateFormat('dd/MM/yyyy').format(tarefa.data),
-                      style: const TextStyle(
-                        fontSize: 15,
                       ),
-                    ),
-                    selected: selecionadas.contains(tarefa),
-                    selectedTileColor: const Color(0xff4a61e7),
-                    onLongPress: () {
-                      setState(() {
-                        (selecionadas.contains(tarefa))
-                            ? selecionadas.remove(tarefa)
-                            : selecionadas.add(tarefa);
-                      });
-                    },
-                    onTap: () {
-                      selecionadas.isEmpty
-                          ? mostrarDetalhes(tarefa)
-                          : setState(() {
-                              (selecionadas.contains(tarefa))
-                                  ? selecionadas.remove(tarefa)
-                                  : selecionadas.add(tarefa);
-                            });
-                    },
-                  );
-                },
-                padding: const EdgeInsets.all(20),
-                separatorBuilder: (_, ___) => const Divider(),
-                itemCount: tarefasDoDia.length),
+                      if (favoritas.lista.contains(tarefa))
+                        const Icon(Icons.circle, color: Colors.amber, size: 8),
+                    ],
+                  ),
+                  trailing: Text(
+                    DateFormat('dd/MM/yyyy').format(tarefa.data),
+                    style: const TextStyle(fontSize: 15),
+                  ),
+                  selected: selecionadas.contains(tarefa),
+                  selectedTileColor: const Color(0xff4a61e7),
+                  onLongPress: () {
+                    setState(() {
+                      (selecionadas.contains(tarefa))
+                          ? selecionadas.remove(tarefa)
+                          : selecionadas.add(tarefa);
+                    });
+                  },
+                  onTap: () {
+                    selecionadas.isEmpty
+                        ? mostrarDetalhes(tarefa)
+                        : setState(() {
+                            (selecionadas.contains(tarefa))
+                                ? selecionadas.remove(tarefa)
+                                : selecionadas.add(tarefa);
+                          });
+                  },
+                );
+              },
+              separatorBuilder: (_, __) => const Divider(),
+              itemCount: tarefasDoDia.length,
+            ),
           ),
         ],
       ),
@@ -182,9 +168,7 @@ class _HomePageState extends State<HomePage> {
               icon: const Icon(Icons.star),
               label: const Text(
                 'FAVORITAR',
-                style: TextStyle(
-                  letterSpacing: 0,
-                ),
+                style: TextStyle(letterSpacing: 0),
               ),
             )
           : null,

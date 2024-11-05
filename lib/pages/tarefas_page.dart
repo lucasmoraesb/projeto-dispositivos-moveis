@@ -21,25 +21,9 @@ class _TarefasPageState extends State<TarefasPage> {
   appBarDinamica() {
     if (selecionadas.isEmpty) {
       return AppBar(
-        title: const Padding(
-          padding: EdgeInsets.only(top: 20.0), // Adiciona padding-top
-          child: Text(
-            'Minhas Tarefas',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.w500,
-              fontFamily: 'Roboto',
-            ),
-          ),
-        ),
-        elevation: 2,
-        backgroundColor: Colors.blueGrey[50],
-        titleTextStyle: const TextStyle(
-          fontSize: 24,
-          fontWeight: FontWeight.w500,
-          fontFamily: 'Roboto',
-        ),
-        titleSpacing: 46, // Alinha o título à esquerda
+        centerTitle: true,
+        title: const Text('Minhas Tarefas',
+            style: TextStyle(color: Color.fromARGB(255, 255, 255, 255))),
       );
     } else {
       return AppBar(
@@ -104,6 +88,20 @@ class _TarefasPageState extends State<TarefasPage> {
     });
   }
 
+  editarTarefa(Tarefa tarefa) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => NovaTarefaPage(tarefa: tarefa),
+      ),
+    ).then((_) {
+      // Limpa a seleção ao voltar
+      setState(() {
+        selecionadas.clear();
+      });
+    });
+  }
+
   sortData(tabela) {
     tabela.sort((Tarefa a, Tarefa b) => a.data.compareTo(b.data));
   }
@@ -111,21 +109,8 @@ class _TarefasPageState extends State<TarefasPage> {
   @override
   Widget build(BuildContext context) {
     favoritas = Provider.of<TarefasFavoritasRepository>(context);
-    //favoritas = context.watch<TarefasFavoritasRepository>();
     List<Tarefa> tabela = TarefasRepository.tabela;
     sortData(tabela);
-
-    /*  Teste de criação de nova tarefa na Tebela, pela própria "tarefas_page"
-    Tarefa tarefinha = Tarefa(
-      nome: 'teste9[3]',
-      icone: 'images/symbol_ok.png',
-      data: DateTime(2024, 11, 5),
-      descricao: 'É isso Pessoal',
-    );
-
-    tabela.add(tarefinha);
-    */
-    //favoritas.sort();
 
     return Scaffold(
       appBar: appBarDinamica(),
@@ -134,6 +119,7 @@ class _TarefasPageState extends State<TarefasPage> {
         itemBuilder: (BuildContext context, int index) {
           final tarefa = tabela[index];
           return Card(
+            color: const Color(0xFFFFFFFF),
             margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
             child: Column(
               children: [
@@ -141,6 +127,7 @@ class _TarefasPageState extends State<TarefasPage> {
                   shape: const RoundedRectangleBorder(
                     borderRadius: BorderRadius.all(Radius.circular(15)),
                   ),
+                  contentPadding: const EdgeInsets.all(16.0),
                   leading: (selecionadas.contains(tarefa))
                       ? const CircleAvatar(
                           child: Icon(Icons.check),
@@ -150,6 +137,7 @@ class _TarefasPageState extends State<TarefasPage> {
                             tarefa.status == 'Concluído'
                                 ? Icons.check_circle
                                 : Icons.circle,
+                            color: Colors.white,
                           ),
                         ),
                   title: Row(
@@ -157,8 +145,12 @@ class _TarefasPageState extends State<TarefasPage> {
                       Expanded(
                         child: Text(
                           tarefa.nome,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 25,
+                            color: selecionadas.contains(tarefa)
+                                ? Colors.white // Texto branco se selecionado
+                                : Colors
+                                    .black, // Cor original se não selecionado
                           ),
                         ),
                       ),
@@ -168,8 +160,11 @@ class _TarefasPageState extends State<TarefasPage> {
                   ),
                   trailing: Text(
                     DateFormat('dd/MM/yyyy').format(tarefa.data),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 15,
+                      color: selecionadas.contains(tarefa)
+                          ? Colors.white // Data branca se selecionada
+                          : Colors.black, // Cor original se não selecionada
                     ),
                   ),
                   selected: selecionadas.contains(tarefa),
@@ -193,8 +188,8 @@ class _TarefasPageState extends State<TarefasPage> {
                 ),
                 if (tarefa.status == 'Concluído')
                   Padding(
-                    padding: const EdgeInsets.only(
-                        left: 16.0, right: 16.0, bottom: 8.0),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0, vertical: 8.0),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -214,23 +209,35 @@ class _TarefasPageState extends State<TarefasPage> {
                       ],
                     ),
                   ),
+                // Adicionando um botão de editar
+                if (selecionadas.contains(tarefa))
+                  IconButton(
+                    icon: const Icon(Icons.edit, color: Colors.blue),
+                    onPressed: () => editarTarefa(tarefa),
+                  ),
               ],
             ),
           );
         },
       ),
-      floatingActionButton: Align(
-        alignment: Alignment.bottomCenter,
-        child: FloatingActionButton(
-          backgroundColor: Colors.blue.shade900,
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => NovaTarefaPage()),
-            );
-          },
-          child: const Icon(Icons.add),
-        ),
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: FloatingActionButton(
+              backgroundColor: const Color(0xFF3787eb),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const NovaTarefaPage()),
+                );
+              },
+              child: const Icon(Icons.add),
+            ),
+          ),
+        ],
       ),
     );
   }
