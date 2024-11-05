@@ -107,96 +107,106 @@ class _HomePageState extends State<HomePage> {
 
     return Scaffold(
       appBar: appBarDinamica(),
-      body: ListView.builder(
-        itemCount: tarefasDoDia.length,
-        itemBuilder: (BuildContext context, int index) {
-          final tarefa = tarefasDoDia[index];
-          return Card(
-            margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-            child: Column(
-              children: [
-                ListTile(
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(15)),
-                  ),
-                  leading: (selecionadas.contains(tarefa))
-                      ? const CircleAvatar(
-                          child: Icon(Icons.check),
-                        )
-                      : CircleAvatar(
-                          child: Icon(
-                            tarefa.status == 'Concluído'
-                                ? Icons.check_circle
-                                : Icons.circle,
-                          ),
-                        ),
-                  title: Row(
+      body: tarefasDoDia.isEmpty
+          ? const Center(
+              child: Text(
+                'Sem tarefas hoje',
+                style: TextStyle(fontSize: 18),
+              ),
+            )
+          : ListView.builder(
+              itemCount: tarefasDoDia.length,
+              itemBuilder: (BuildContext context, int index) {
+                final tarefa = tarefasDoDia[index];
+                return Card(
+                  margin:
+                      const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                  child: Column(
                     children: [
-                      Expanded(
-                        child: Text(
-                          tarefa.nome,
+                      ListTile(
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(15)),
+                        ),
+                        leading: (selecionadas.contains(tarefa))
+                            ? const CircleAvatar(
+                                child: Icon(Icons.check),
+                              )
+                            : CircleAvatar(
+                                child: Icon(
+                                  tarefa.status == 'Concluído'
+                                      ? Icons.check_circle
+                                      : Icons.circle,
+                                ),
+                              ),
+                        title: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                tarefa.nome,
+                                style: const TextStyle(
+                                  fontSize: 25,
+                                ),
+                              ),
+                            ),
+                            if (favoritas.lista.contains(tarefa))
+                              const Icon(Icons.star,
+                                  color: Colors.amber, size: 25),
+                          ],
+                        ),
+                        trailing: Text(
+                          DateFormat('dd/MM/yyyy').format(tarefa.data),
                           style: const TextStyle(
-                            fontSize: 25,
+                            fontSize: 15,
                           ),
                         ),
-                      ),
-                      if (favoritas.lista.contains(tarefa))
-                        const Icon(Icons.star, color: Colors.amber, size: 25),
-                    ],
-                  ),
-                  trailing: Text(
-                    DateFormat('dd/MM/yyyy').format(tarefa.data),
-                    style: const TextStyle(
-                      fontSize: 15,
-                    ),
-                  ),
-                  selected: selecionadas.contains(tarefa),
-                  selectedTileColor: const Color(0xff4a61e7),
-                  onLongPress: () {
-                    setState(() {
-                      (selecionadas.contains(tarefa))
-                          ? selecionadas.remove(tarefa)
-                          : selecionadas.add(tarefa);
-                    });
-                  },
-                  onTap: () {
-                    selecionadas.isEmpty
-                        ? mostrarDetalhes(tarefa)
-                        : setState(() {
+                        selected: selecionadas.contains(tarefa),
+                        selectedTileColor: const Color(0xff4a61e7),
+                        onLongPress: () {
+                          setState(() {
                             (selecionadas.contains(tarefa))
                                 ? selecionadas.remove(tarefa)
                                 : selecionadas.add(tarefa);
                           });
-                  },
-                ),
-                if (tarefa.status == 'Concluído')
-                  Padding(
-                    padding: const EdgeInsets.only(
-                        left: 16.0, right: 16.0, bottom: 8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            tarefa.descricao,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: Colors.black54,
-                            ),
+                        },
+                        onTap: () {
+                          selecionadas.isEmpty
+                              ? mostrarDetalhes(tarefa)
+                              : setState(() {
+                                  (selecionadas.contains(tarefa))
+                                      ? selecionadas.remove(tarefa)
+                                      : selecionadas.add(tarefa);
+                                });
+                        },
+                      ),
+                      if (tarefa.status == 'Concluído')
+                        Padding(
+                          padding: const EdgeInsets.only(
+                              left: 16.0, right: 16.0, bottom: 8.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  tarefa.descricao,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.black54,
+                                  ),
+                                ),
+                              ),
+                              IconButton(
+                                icon:
+                                    const Icon(Icons.delete, color: Colors.red),
+                                onPressed: () => excluirTarefa(tarefa),
+                              ),
+                            ],
                           ),
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () => excluirTarefa(tarefa),
-                        ),
-                      ],
-                    ),
+                    ],
                   ),
-              ],
+                );
+              },
             ),
-          );
-        },
-      ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {

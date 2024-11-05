@@ -32,9 +32,6 @@ class TarefasRepository extends ChangeNotifier {
       data: DateTime(2024, 11, 05),
       descricao: 'talvez eu tenha algo para descrever',
     ),
-      data: DateTime(2024, 11, 4),
-      descricao: 'ABC',
-    ),
   ];
 
   addTarefa(Tarefa tarefa) {
