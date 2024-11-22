@@ -25,6 +25,7 @@ class _CalendarioPageState extends State<CalendarioPage> {
           TableCalendar(
             firstDay: DateTime(2020),
             lastDay: DateTime(2030),
+            locale: 'pt_BR',
             focusedDay: _focusedDay, // Use a data focada
             selectedDayPredicate: (day) => isSameDay(day, _selectedDate),
             onDaySelected: (selectedDay, focusedDay) {

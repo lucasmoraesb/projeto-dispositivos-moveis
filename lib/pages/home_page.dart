@@ -7,6 +7,7 @@ import '../pages/tarefas_descricao_page.dart';
 import 'package:intl/intl.dart';
 
 import 'nova_tarefa_page.dart';
+import '../widgets/tarefa_card.dart'; // Importe o TarefaCard
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -60,7 +61,6 @@ class _HomePageState extends State<HomePage> {
             ),
           )
         ],
-        //backgroundColor: Colors.blueGrey[50],
         elevation: 2,
         iconTheme: const IconThemeData(color: Colors.black87),
         titleTextStyle: const TextStyle(
@@ -86,11 +86,49 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  excluirTarefa(Tarefa tarefa) {
+  excluirTarefasSelecionadas() {
     setState(() {
-      TarefasRepository.tabela.remove(tarefa);
-      //tarefas.remove(tarefa);
+      for (var tarefa in selecionadas) {
+        TarefasRepository.tabela.remove(tarefa);
+      }
+      selecionadas.clear(); // Limpa a lista de selecionadas
     });
+  }
+
+  void showAlertDialog2(
+      BuildContext context, List<Tarefa> selecionadas, Function onConfirm) {
+    Widget cancelaButton = TextButton(
+      child: const Text("Cancelar"),
+      onPressed: () {
+        Navigator.of(context).pop(); // Fecha o diálogo
+      },
+    );
+
+    Widget continuaButton = TextButton(
+      child: const Text("Continuar"),
+      onPressed: () {
+        onConfirm(); // Chama a função de confirmação
+        Navigator.of(context).pop(); // Fecha o diálogo
+      },
+    );
+
+    // Configura o AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: const Text("Confirmação"),
+      content: const Text("Deseja realmente excluir as tarefas selecionadas?"),
+      actions: [
+        cancelaButton,
+        continuaButton,
+      ],
+    );
+
+    // Exibe o diálogo
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
   }
 
   @override
@@ -118,112 +156,95 @@ class _HomePageState extends State<HomePage> {
               itemCount: tarefasDoDia.length,
               itemBuilder: (BuildContext context, int index) {
                 final tarefa = tarefasDoDia[index];
-                return Card(
-                  margin:
-                      const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                  child: Column(
-                    children: [
-                      ListTile(
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(15)),
-                        ),
-                        leading: (selecionadas.contains(tarefa))
-                            ? const CircleAvatar(
-                                child: Icon(Icons.check),
-                              )
-                            : CircleAvatar(
-                                child: Icon(
-                                  tarefa.status == 'Concluído'
-                                      ? Icons.check_circle
-                                      : Icons.circle,
-                                ),
-                              ),
-                        title: Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                tarefa.nome,
-                                style: const TextStyle(
-                                  fontSize: 25,
-                                ),
-                              ),
-                            ),
-                            if (favoritas.lista.contains(tarefa))
-                              const Icon(Icons.star,
-                                  color: Colors.amber, size: 25),
-                          ],
-                        ),
-                        trailing: Text(
-                          DateFormat('dd/MM/yyyy').format(tarefa.data),
-                          style: const TextStyle(
-                            fontSize: 15,
-                          ),
-                        ),
-                        selected: selecionadas.contains(tarefa),
-                        selectedTileColor: const Color(0xff4a61e7),
-                        onLongPress: () {
-                          setState(() {
+                return TarefaCard(
+                  tarefa: tarefa,
+                  selecionadas: selecionadas,
+                  onTap: (Tarefa tarefa) {
+                    selecionadas.isEmpty
+                        ? mostrarDetalhes(tarefa)
+                        : setState(() {
                             (selecionadas.contains(tarefa))
                                 ? selecionadas.remove(tarefa)
                                 : selecionadas.add(tarefa);
                           });
-                        },
-                        onTap: () {
-                          selecionadas.isEmpty
-                              ? mostrarDetalhes(tarefa)
-                              : setState(() {
-                                  (selecionadas.contains(tarefa))
-                                      ? selecionadas.remove(tarefa)
-                                      : selecionadas.add(tarefa);
-                                });
-                        },
-                      ),
-                      if (tarefa.status == 'Concluído')
-                        Padding(
-                          padding: const EdgeInsets.only(
-                              left: 16.0, right: 16.0, bottom: 8.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  tarefa.descricao,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.black54,
-                                  ),
-                                ),
-                              ),
-                              IconButton(
-                                icon:
-                                    const Icon(Icons.delete, color: Colors.red),
-                                onPressed: () => excluirTarefa(tarefa),
-                              ),
-                            ],
-                          ),
-                        ),
-                    ],
-                  ),
+                  },
+                  onLongPress: (Tarefa tarefa) {
+                    setState(() {
+                      (selecionadas.contains(tarefa))
+                          ? selecionadas.remove(tarefa)
+                          : selecionadas.add(tarefa);
+                    });
+                  },
+                  onDelete: (Tarefa tarefa) {
+                    excluirTarefasSelecionadas();
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text(
+                            'Tarefa "${tarefa.nome}" excluída com sucesso!')));
+                  },
                 );
               },
             ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => NovaTarefaPage()),
-          );
-        },
-        icon: const Icon(Icons.add),
-        label: const Text(
-          'Criar Tarefa',
-          style: TextStyle(
-            letterSpacing: 0,
-          ),
+      floatingActionButton: Align(
+        alignment: Alignment.bottomRight,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            selecionadas.isNotEmpty
+                ? FloatingActionButton.extended(
+                    icon: const Icon(Icons.delete),
+                    label: const Text(
+                      'Remover',
+                      style: TextStyle(
+                        letterSpacing: 0,
+                      ),
+                    ),
+                    onPressed: () {
+                      if (selecionadas.isNotEmpty) {
+                        // Chama o diálogo de confirmação
+                        showAlertDialog2(context, selecionadas, () {
+                          excluirTarefasSelecionadas();
+
+                          // Exibir mensagem com o número de tarefas removidas
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Tarefa(s) removida(s) com sucesso!',
+                              ),
+                            ),
+                          );
+                        });
+                      }
+                    },
+                  )
+                : const SizedBox(width: 0),
+            const SizedBox(width: 120),
+            FloatingActionButton.extended(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const NovaTarefaPage()),
+                );
+              },
+              icon: const Icon(Icons.add),
+              label: const Text(
+                'Criar Tarefa',
+                style: TextStyle(
+                  letterSpacing: 0,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
+  }
+}
+
+
+               
+
 /*     return Scaffold(
       appBar: appBarDinamica(),
       body: Column(
@@ -321,5 +342,3 @@ class _HomePageState extends State<HomePage> {
             )
           : null,
     ); */
-  }
-}

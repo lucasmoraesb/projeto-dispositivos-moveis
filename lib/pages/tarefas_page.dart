@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
+import 'package:provider/provider.dart'; // Importe o novo arquivo de card
 import '../repositories/tarefas_favoritas_repository.dart';
-import '../models/tarefa.dart';
 import '../repositories/tarefas_repository.dart';
 import '../pages/tarefas_descricao_page.dart';
 import '../pages/nova_tarefa_page.dart';
+import '../models/tarefa.dart';
+import '../widgets/tarefa_card.dart';
 
 class TarefasPage extends StatefulWidget {
   const TarefasPage({super.key});
@@ -161,96 +161,30 @@ class _TarefasPageState extends State<TarefasPage> {
               itemCount: tabela.length,
               itemBuilder: (BuildContext context, int index) {
                 final tarefa = tabela[index];
-                return Card(
-                  margin:
-                      const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                  child: Column(
-                    children: [
-                      ListTile(
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(15)),
-                        ),
-                        leading: (selecionadas.contains(tarefa))
-                            ? const CircleAvatar(
-                                child: Icon(Icons.check),
-                              )
-                            : CircleAvatar(
-                                child: Icon(
-                                  tarefa.status == 'Concluído'
-                                      ? Icons.check_circle
-                                      : Icons.circle,
-                                ),
-                              ),
-                        title: Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                tarefa.nome,
-                                style: const TextStyle(
-                                  fontSize: 25,
-                                ),
-                              ),
-                            ),
-                            if (favoritas.lista.contains(tarefa))
-                              const Icon(Icons.star,
-                                  color: Colors.amber, size: 25),
-                          ],
-                        ),
-                        trailing: Text(
-                          DateFormat('dd/MM/yyyy').format(tarefa.data),
-                          style: const TextStyle(
-                            fontSize: 15,
-                          ),
-                        ),
-                        selected: selecionadas.contains(tarefa),
-                        selectedTileColor: const Color(0xff4a61e7),
-                        onLongPress: () {
-                          setState(() {
+                return TarefaCard(
+                  tarefa: tarefa,
+                  selecionadas: selecionadas,
+                  onTap: (Tarefa tarefa) {
+                    selecionadas.isEmpty
+                        ? mostrarDetalhes(tarefa)
+                        : setState(() {
                             (selecionadas.contains(tarefa))
                                 ? selecionadas.remove(tarefa)
                                 : selecionadas.add(tarefa);
                           });
-                        },
-                        onTap: () {
-                          selecionadas.isEmpty
-                              ? mostrarDetalhes(tarefa)
-                              : setState(() {
-                                  (selecionadas.contains(tarefa))
-                                      ? selecionadas.remove(tarefa)
-                                      : selecionadas.add(tarefa);
-                                });
-                        },
-                      ),
-                      if (tarefa.status == 'Concluído')
-                        Padding(
-                          padding: const EdgeInsets.only(
-                              left: 16.0, right: 16.0, bottom: 8.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  tarefa.descricao,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.black54,
-                                  ),
-                                ),
-                              ),
-                              IconButton(
-                                icon:
-                                    const Icon(Icons.delete, color: Colors.red),
-                                onPressed: () {
-                                  excluirTarefa(tarefa);
-                                  mostrarSnackBar(
-                                      'Tarefa "${tarefa.nome}" excluída com sucesso!'); // Mensagem específica para a tarefa
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-                    ],
-                  ),
+                  },
+                  onLongPress: (Tarefa tarefa) {
+                    setState(() {
+                      (selecionadas.contains(tarefa))
+                          ? selecionadas.remove(tarefa)
+                          : selecionadas.add(tarefa);
+                    });
+                  },
+                  onDelete: (Tarefa tarefa) {
+                    excluirTarefa(tarefa);
+                    mostrarSnackBar(
+                        'Tarefa "${tarefa.nome}" excluída com sucesso!');
+                  },
                 );
               },
             ),
