@@ -4,7 +4,6 @@ import '../repositories/tarefas_favoritas_repository.dart';
 import '../models/tarefa.dart';
 import '../repositories/tarefas_repository.dart';
 import '../pages/tarefas_descricao_page.dart';
-import 'package:intl/intl.dart';
 
 import 'nova_tarefa_page.dart';
 import '../widgets/tarefa_card.dart'; // Importe o TarefaCard

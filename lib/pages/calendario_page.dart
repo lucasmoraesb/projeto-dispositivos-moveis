@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../widgets/calendario_card.dart';
+import '../repositories/tarefas_repository.dart';
+import '../models/tarefa.dart';
 
 class CalendarioPage extends StatefulWidget {
   const CalendarioPage({super.key});
@@ -12,6 +14,14 @@ class CalendarioPage extends StatefulWidget {
 class _CalendarioPageState extends State<CalendarioPage> {
   DateTime? _selectedDate;
   DateTime _focusedDay = DateTime.now(); // Mantenha o estado do mês focado
+
+  int _getTarefasCountForDay(DateTime day) {
+    return TarefasRepository.tabela.where((tarefa) {
+      return tarefa.data.year == day.year &&
+          tarefa.data.month == day.month &&
+          tarefa.data.day == day.day;
+    }).length;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,6 +54,45 @@ class _CalendarioPageState extends State<CalendarioPage> {
                 ),
               );
             },
+            calendarBuilders: CalendarBuilders(
+              defaultBuilder: (context, day, focusedDay) {
+                final tarefasCount = _getTarefasCountForDay(day);
+                return Stack(
+                  children: [
+                    Center(
+                      child: Text(
+                        '${day.day}',
+                        style: TextStyle(color: Colors.black),
+                      ),
+                    ),
+                    if (tarefasCount > 0)
+                      Positioned(
+                        right: 1,
+                        top: 1,
+                        child: Container(
+                          padding: const EdgeInsets.all(1),
+                          decoration: BoxDecoration(
+                            color: Colors.red,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          constraints: const BoxConstraints(
+                            minWidth: 12,
+                            minHeight: 12,
+                          ),
+                          child: Text(
+                            '$tarefasCount',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 8,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                  ],
+                );
+              },
+            ),
           ),
         ],
       ),
