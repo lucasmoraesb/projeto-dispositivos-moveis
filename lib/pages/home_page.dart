@@ -7,7 +7,8 @@ import '../pages/tarefas_descricao_page.dart';
 import 'package:intl/intl.dart';
 
 import 'nova_tarefa_page.dart';
-import '../widgets/tarefa_card.dart'; // Importe o TarefaCard
+import '../widgets/tarefa_card.dart';
+import '../pages/configuracoes_page.dart'; // Importe o TarefaCard
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -22,10 +23,11 @@ class _HomePageState extends State<HomePage> {
   appBarDinamica() {
     if (selecionadas.isEmpty) {
       return AppBar(
+        iconTheme: const IconThemeData(color: Color(0xFFFFFFFF)),
         centerTitle: true,
-        title: const Text('Minhas Tarefas'),
+        title: const Text('Tarefas do Dia'),
         titleTextStyle: const TextStyle(
-          color: Colors.black87,
+          color: Color(0xFFFFFFFF),
           fontSize: 25,
         ),
         elevation: 2,
@@ -76,6 +78,15 @@ class _HomePageState extends State<HomePage> {
       context,
       MaterialPageRoute(
         builder: (_) => TarefasDescricaoPage(tarefa: tarefa),
+      ),
+    );
+  }
+
+  mostrarConfiguracoes() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const ConfiguracoesPage(),
       ),
     );
   }
@@ -145,6 +156,24 @@ class _HomePageState extends State<HomePage> {
 
     return Scaffold(
       appBar: appBarDinamica(),
+      drawer: Drawer(
+        backgroundColor: const Color(0xFFFFFFFF),
+        child: ListView(
+          children: [
+            ListTile(
+              leading: const Padding(
+                padding: EdgeInsets.only(
+                    right: 8.0), // Adiciona um padding à direita do ícone
+                child: Icon(Icons.settings), // Ícone de engrenagem
+              ),
+              title: const Text('Configurações'),
+              onTap: () {
+                mostrarConfiguracoes();
+              },
+            ),
+          ],
+        ),
+      ),
       body: tarefasDoDia.isEmpty
           ? const Center(
               child: Text(
@@ -219,19 +248,24 @@ class _HomePageState extends State<HomePage> {
                   )
                 : const SizedBox(width: 0),
             const SizedBox(width: 120),
-            FloatingActionButton.extended(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const NovaTarefaPage()),
-                );
-              },
-              icon: const Icon(Icons.add),
-              label: const Text(
-                'Criar Tarefa',
-                style: TextStyle(
-                  letterSpacing: 0,
+            Padding(
+              padding: const EdgeInsets.only(right: 16),
+              child: FloatingActionButton.extended(
+                backgroundColor: const Color.fromARGB(255, 96, 126, 201),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const NovaTarefaPage()),
+                  );
+                },
+                icon: const Icon(
+                  Icons.add,
+                  color: Color(0xFFFFFFFF),
+                ),
+                label: const Text(
+                  'Criar Tarefa',
+                  style: TextStyle(letterSpacing: 0, color: Color(0xFFFFFFFF)),
                 ),
               ),
             ),

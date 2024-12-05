@@ -6,6 +6,7 @@ import '../pages/tarefas_descricao_page.dart';
 import '../pages/nova_tarefa_page.dart';
 import '../models/tarefa.dart';
 import '../widgets/tarefa_card.dart';
+import 'configuracoes_page.dart';
 
 class TarefasPage extends StatefulWidget {
   const TarefasPage({super.key});
@@ -19,13 +20,23 @@ class _TarefasPageState extends State<TarefasPage> {
   late TarefasFavoritasRepository favoritas;
   late TarefasRepository tarefasRepo;
 
+  mostrarConfiguracoes() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const ConfiguracoesPage(),
+      ),
+    );
+  }
+
   appBarDinamica() {
     if (selecionadas.isEmpty) {
       return AppBar(
+        iconTheme: const IconThemeData(color: Color(0xFFFFFFFF)),
         centerTitle: true,
         title: const Text('Minhas Tarefas'),
         titleTextStyle: const TextStyle(
-          color: Colors.black87,
+          color: Color(0xFFFFFFFF),
           fontSize: 25,
         ),
         elevation: 2,
@@ -150,6 +161,24 @@ class _TarefasPageState extends State<TarefasPage> {
 
     return Scaffold(
       appBar: appBarDinamica(),
+      drawer: Drawer(
+        backgroundColor: const Color(0xFFFFFFFF),
+        child: ListView(
+          children: [
+            ListTile(
+              leading: const Padding(
+                padding: EdgeInsets.only(
+                    right: 8.0), // Adiciona um padding à direita do ícone
+                child: Icon(Icons.settings), // Ícone de engrenagem
+              ),
+              title: const Text('Configurações'),
+              onTap: () {
+                mostrarConfiguracoes();
+              },
+            ),
+          ],
+        ),
+      ),
       body: tabela.isEmpty
           ? const Center(
               child: Text(

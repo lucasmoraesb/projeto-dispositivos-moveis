@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'controllers/paginas_controller.dart';
+import 'package:projeto_dispositivos_moveis/widgets/auth_check.dart';
 
 class App extends StatelessWidget {
   const App({super.key});
@@ -15,9 +15,9 @@ class App extends StatelessWidget {
           elevation: 2,
           centerTitle: true,
         ),
-        scaffoldBackgroundColor: const Color.fromARGB(255, 228, 228, 228),
+        scaffoldBackgroundColor: const Color(0xFFFFFFFF),
       ),
-      home: const PaginasController(),
+      home: const AuthCheck(),
     );
   }
 }

@@ -41,9 +41,12 @@ class _PaginasControllerState extends State<PaginasController> {
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Colors.indigo, // Define o fundo como indigo
         currentIndex: paginaAtual,
-        selectedItemColor: Colors.indigo,
-        unselectedItemColor: Colors.grey,
+        selectedItemColor: Colors.white, // Destaque para o item selecionado
+        unselectedItemColor: const Color.fromARGB(
+            132, 255, 255, 255), // Cor para os itens não selecionados
+        type: BottomNavigationBarType.fixed, // Evita transparência
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(
