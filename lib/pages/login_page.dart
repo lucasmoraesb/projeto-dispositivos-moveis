@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:projeto_dispositivos_moveis/controllers/paginas_controller.dart';
+import 'package:projeto_dispositivos_moveis/pages/acao_casa_page.dart';
 import 'package:projeto_dispositivos_moveis/services/auth_service.dart';
 import 'package:provider/provider.dart';
 
@@ -65,34 +66,42 @@ class _LoginPageState extends State<LoginPage> {
         final username = data?['username'];
 
         if (username != null) {
-          // Acessa a subcoleção "casa" do usuário logado
-          final casaRef = FirebaseFirestore.instance
-              .collection('usuarios')
-              .doc(auth.usuario!.uid)
-              .collection('casa');
+          // Busca em todas as casas para verificar se o usuário já é membro
+          final casasSnapshot =
+              await FirebaseFirestore.instance.collection('casas').get();
 
-          final casasSnapshot = await casaRef.get();
+          bool usuarioEmCasa = false;
 
-          if (casasSnapshot.docs.isEmpty) {
-            // Usuário não possui uma casa, redireciona para NovaCasaPage
-            if (mounted) {
-              // Verifica se o widget está montado antes de navegar
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (context) => const NovaCasaPage()),
-              );
+          for (var casaDoc in casasSnapshot.docs) {
+            final casaData = casaDoc.data();
+            final membros = List<String>.from(casaData['membros'] ?? []);
+
+            if (membros.contains(username)) {
+              usuarioEmCasa = true;
+              break;
             }
-          } else {
-            // Usuário já possui uma casa, redireciona para PaginasController
+          }
+
+          if (usuarioEmCasa) {
+            // Usuário já pertence a uma casa, redireciona para PaginasController
             if (mounted) {
-              // Verifica se o widget está montado antes de navegar
               Navigator.of(context).pushReplacement(
                 MaterialPageRoute(
                     builder: (context) => const PaginasController()),
               );
             }
+          } else {
+            // Usuário não pertence a nenhuma casa, redireciona para AcaoCasaPage
+            if (mounted) {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) => const AcaoCasaPage()),
+              );
+            }
           }
         } else {
-          throw Exception('Username não encontrado para o usuário atual.');
+          setState(() => loading = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Usuário ainda não cadastrado.')));
         }
       }
     } on AuthException catch (e) {
@@ -123,29 +132,35 @@ class _LoginPageState extends State<LoginPage> {
         final username = data?['username'];
 
         if (username != null) {
-          // Acessa a subcoleção "casa" do usuário registrado
-          final casaRef = FirebaseFirestore.instance
-              .collection('usuarios')
-              .doc(auth.usuario!.uid)
-              .collection('casa');
+          // Busca em todas as casas para verificar se o usuário já é membro
+          final casasSnapshot =
+              await FirebaseFirestore.instance.collection('casas').get();
 
-          final casasSnapshot = await casaRef.get();
+          bool usuarioEmCasa = false;
 
-          if (casasSnapshot.docs.isEmpty) {
-            // Usuário não possui uma casa, redireciona para NovaCasaPage
-            if (mounted) {
-              // Verifica se o widget está montado antes de navegar
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (context) => const NovaCasaPage()),
-              );
+          for (var casaDoc in casasSnapshot.docs) {
+            final casaData = casaDoc.data();
+            final membros = List<String>.from(casaData['membros'] ?? []);
+
+            if (membros.contains(username)) {
+              usuarioEmCasa = true;
+              break;
             }
-          } else {
-            // Usuário já possui uma casa, redireciona para PaginasController
+          }
+
+          if (usuarioEmCasa) {
+            // Usuário já pertence a uma casa, redireciona para PaginasController
             if (mounted) {
-              // Verifica se o widget está montado antes de navegar
               Navigator.of(context).pushReplacement(
                 MaterialPageRoute(
                     builder: (context) => const PaginasController()),
+              );
+            }
+          } else {
+            // Usuário não pertence a nenhuma casa, redireciona para AcaoCasaPage
+            if (mounted) {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) => const AcaoCasaPage()),
               );
             }
           }

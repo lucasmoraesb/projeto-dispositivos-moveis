@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:projeto_dispositivos_moveis/repositories/casas_repository.dart';
 import 'package:projeto_dispositivos_moveis/services/auth_service.dart';
 import 'package:provider/provider.dart';
+import '../controllers/paginas_controller.dart';
 import '../models/casa.dart';
 import '../models/tarefa.dart';
 import '../repositories/tarefas_repository.dart';
@@ -17,7 +18,7 @@ class NovaCasaPage extends StatefulWidget {
 class _NovaCasaPageState extends State<NovaCasaPage> {
   final _formKey = GlobalKey<FormState>();
   final _nomeController = TextEditingController();
-  final _descricaoController = TextEditingController();
+  final _senhaController = TextEditingController();
 
   late AuthService auth;
 
@@ -45,6 +46,16 @@ class _NovaCasaPageState extends State<NovaCasaPage> {
                   return null;
                 },
               ),
+              TextFormField(
+                controller: _senhaController,
+                decoration: const InputDecoration(labelText: 'Senha'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Por favor, insira uma senha para a casa';
+                  }
+                  return null;
+                },
+              ),
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () async {
@@ -67,16 +78,36 @@ class _NovaCasaPageState extends State<NovaCasaPage> {
                       return;
                     }
 
+                    final casaSnapshot = await FirebaseFirestore.instance
+                        .collection(
+                            'casas') // Consulta em todas as coleções 'casa' dos usuários
+                        .where('senha', isEqualTo: _senhaController.text)
+                        .get();
+
+                    if (casaSnapshot.docs.isNotEmpty) {
+                      // Senha já existe, exibe um erro
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text(
+                                'Já existe uma casa com essa senha. Por favor, digite outra senha.')),
+                      );
+                      return;
+                    }
+
                     casasRepository.criarCasa(
                       Casa(
                         nome: _nomeController.text,
                         criador: username, // Passa o username como criador
-                        membros: [
-                          username
-                        ], // Inclui o username na lista de membros
+                        membros: [username],
+                        senha: _senhaController
+                            .text, // Inclui o username na lista de membros
                       ),
                     );
-                    Navigator.pop(context);
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const PaginasController()),
+                    );
                   }
                 },
                 child: const Text('Criar Casa'),
