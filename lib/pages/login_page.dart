@@ -1,7 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:projeto_dispositivos_moveis/controllers/paginas_controller.dart';
 import 'package:projeto_dispositivos_moveis/services/auth_service.dart';
 import 'package:provider/provider.dart';
+
+import 'nova_casa_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -14,6 +17,7 @@ class _LoginPageState extends State<LoginPage> {
   final formKey = GlobalKey<FormState>();
   final email = TextEditingController();
   final senha = TextEditingController();
+  final usernameController = TextEditingController();
 
   bool isLogin = true;
   late String titulo;
@@ -46,12 +50,50 @@ class _LoginPageState extends State<LoginPage> {
   login() async {
     setState(() => loading = true);
     try {
-      await context.read<AuthService>().login(email.text, senha.text);
+      await context
+          .read<AuthService>()
+          .login(email.text, senha.text, usernameController.text);
       AuthService auth = Provider.of<AuthService>(context, listen: false);
+
       if (auth.usuario != null) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const PaginasController()),
-        );
+        // Acessa o documento do usuário logado
+        final doc = await FirebaseFirestore.instance
+            .collection('usuarios')
+            .doc(auth.usuario!.uid)
+            .get();
+        final data = doc.data();
+        final username = data?['username'];
+
+        if (username != null) {
+          // Acessa a subcoleção "casa" do usuário logado
+          final casaRef = FirebaseFirestore.instance
+              .collection('usuarios')
+              .doc(auth.usuario!.uid)
+              .collection('casa');
+
+          final casasSnapshot = await casaRef.get();
+
+          if (casasSnapshot.docs.isEmpty) {
+            // Usuário não possui uma casa, redireciona para NovaCasaPage
+            if (mounted) {
+              // Verifica se o widget está montado antes de navegar
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) => const NovaCasaPage()),
+              );
+            }
+          } else {
+            // Usuário já possui uma casa, redireciona para PaginasController
+            if (mounted) {
+              // Verifica se o widget está montado antes de navegar
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                    builder: (context) => const PaginasController()),
+              );
+            }
+          }
+        } else {
+          throw Exception('Username não encontrado para o usuário atual.');
+        }
       }
     } on AuthException catch (e) {
       setState(() => loading = false);
@@ -63,12 +105,53 @@ class _LoginPageState extends State<LoginPage> {
   registrar() async {
     setState(() => loading = true);
     try {
-      await context.read<AuthService>().registrar(email.text, senha.text);
+      await context.read<AuthService>().registrar(
+            email.text,
+            senha.text,
+            usernameController.text.trim(),
+          );
+
       AuthService auth = Provider.of<AuthService>(context, listen: false);
+
       if (auth.usuario != null) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const PaginasController()),
-        );
+        // Acessa o documento do usuário registrado
+        final doc = await FirebaseFirestore.instance
+            .collection('usuarios')
+            .doc(auth.usuario!.uid)
+            .get();
+        final data = doc.data();
+        final username = data?['username'];
+
+        if (username != null) {
+          // Acessa a subcoleção "casa" do usuário registrado
+          final casaRef = FirebaseFirestore.instance
+              .collection('usuarios')
+              .doc(auth.usuario!.uid)
+              .collection('casa');
+
+          final casasSnapshot = await casaRef.get();
+
+          if (casasSnapshot.docs.isEmpty) {
+            // Usuário não possui uma casa, redireciona para NovaCasaPage
+            if (mounted) {
+              // Verifica se o widget está montado antes de navegar
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) => const NovaCasaPage()),
+              );
+            }
+          } else {
+            // Usuário já possui uma casa, redireciona para PaginasController
+            if (mounted) {
+              // Verifica se o widget está montado antes de navegar
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                    builder: (context) => const PaginasController()),
+              );
+            }
+          }
+        } else {
+          throw Exception('Username não encontrado para o usuário atual.');
+        }
       }
     } on AuthException catch (e) {
       setState(() => loading = false);
@@ -96,6 +179,22 @@ class _LoginPageState extends State<LoginPage> {
                       fontSize: 35,
                       fontWeight: FontWeight.bold,
                       letterSpacing: -1.5,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: TextFormField(
+                      controller: usernameController,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: 'Username',
+                      ),
+                      validator: (value) {
+                        if (!isLogin && (value == null || value.isEmpty)) {
+                          return 'Informe um username!';
+                        }
+                        return null;
+                      },
                     ),
                   ),
                   Padding(
