@@ -23,6 +23,18 @@ class _CalendarioPageState extends State<CalendarioPage> {
     }).length;
   }
 
+  List<Tarefa> _getTarefasPassadas() {
+    return TarefasRepository.tabela
+        .where((tarefa) => tarefa.data.isBefore(DateTime.now()))
+        .toList();
+  }
+
+  List<Tarefa> _getTarefasPendentes() {
+    return TarefasRepository.tabela
+        .where((tarefa) => !tarefa.data.isBefore(DateTime.now()))
+        .toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,15 +48,14 @@ class _CalendarioPageState extends State<CalendarioPage> {
             firstDay: DateTime(2020),
             lastDay: DateTime(2030),
             locale: 'pt_BR',
-            focusedDay: _focusedDay, // Use a data focada
+            focusedDay: _focusedDay,
             selectedDayPredicate: (day) => isSameDay(day, _selectedDate),
             onDaySelected: (selectedDay, focusedDay) {
               setState(() {
                 _selectedDate = selectedDay;
-                _focusedDay =
-                    selectedDay; // Atualize o mês focado para a data selecionada
+                _focusedDay = selectedDay;
               });
-              // Navegar para a DisplayDateScreen ao selecionar uma data
+
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -92,6 +103,72 @@ class _CalendarioPageState extends State<CalendarioPage> {
                   ],
                 );
               },
+            ),
+          ),
+          const SizedBox(height: 16),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Tarefas Passadas:",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    ..._getTarefasPassadas().map((tarefa) => Card(
+                          color: Colors.red[100],
+                          elevation: 3,
+                          child: ListTile(
+                            leading: Icon(Icons.history, color: Colors.red),
+                            title: Text(
+                              tarefa.nome,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.red[900],
+                              ),
+                            ),
+                            subtitle: Text(
+                              "${tarefa.data.day}/${tarefa.data.month}/${tarefa.data.year}",
+                              style: TextStyle(color: Colors.red[700]),
+                            ),
+                          ),
+                        )),
+                    const SizedBox(height: 16),
+                    const Text(
+                      "Tarefas Pendentes:",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    ..._getTarefasPendentes().map((tarefa) => Card(
+                          color: Colors.green[100],
+                          elevation: 3,
+                          child: ListTile(
+                            leading: Icon(Icons.pending, color: Colors.green),
+                            title: Text(
+                              tarefa.nome,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.green[900],
+                              ),
+                            ),
+                            subtitle: Text(
+                              "${tarefa.data.day}/${tarefa.data.month}/${tarefa.data.year}",
+                              style: TextStyle(color: Colors.green[700]),
+                            ),
+                          ),
+                        )),
+                  ],
+                ),
+              ),
             ),
           ),
         ],
