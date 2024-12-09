@@ -49,12 +49,10 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   login() async {
+    final auth = Provider.of<AuthService>(context, listen: false);
     setState(() => loading = true);
     try {
-      await context
-          .read<AuthService>()
-          .login(email.text, senha.text, usernameController.text);
-      AuthService auth = Provider.of<AuthService>(context, listen: false);
+      await auth.login(email.text, senha.text, usernameController.text);
 
       if (auth.usuario != null) {
         // Acessa o documento do usuário logado
@@ -99,28 +97,29 @@ class _LoginPageState extends State<LoginPage> {
             }
           }
         } else {
-          setState(() => loading = false);
+          if (mounted) {
+            setState(() => loading = false);
+          }
           ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Usuário ainda não cadastrado.')));
+            const SnackBar(content: Text('Usuário ainda não cadastrado.')),
+          );
         }
       }
     } on AuthException catch (e) {
-      setState(() => loading = false);
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(e.message)));
+      if (mounted) {
+        setState(() => loading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.message)),
+        );
+      }
     }
   }
 
   registrar() async {
+    final auth = Provider.of<AuthService>(context, listen: false);
     setState(() => loading = true);
     try {
-      await context.read<AuthService>().registrar(
-            email.text,
-            senha.text,
-            usernameController.text.trim(),
-          );
-
-      AuthService auth = Provider.of<AuthService>(context, listen: false);
+      await auth.registrar(email.text, senha.text, usernameController.text);
 
       if (auth.usuario != null) {
         // Acessa o documento do usuário registrado
@@ -169,9 +168,12 @@ class _LoginPageState extends State<LoginPage> {
         }
       }
     } on AuthException catch (e) {
-      setState(() => loading = false);
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(e.message)));
+      if (mounted) {
+        setState(() => loading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.message)),
+        );
+      }
     }
   }
 

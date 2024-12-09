@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart'; // Importe o novo arquivo de card
+import 'package:provider/provider.dart';
 import '../repositories/tarefas_favoritas_repository.dart';
 import '../repositories/tarefas_repository.dart';
+import '../repositories/casas_repository.dart'; // Importando o casas_repository
 import '../pages/tarefas_descricao_page.dart';
 import '../pages/nova_tarefa_page.dart';
 import '../models/tarefa.dart';
@@ -17,8 +18,8 @@ class TarefasPage extends StatefulWidget {
 
 class _TarefasPageState extends State<TarefasPage> {
   List<Tarefa> selecionadas = [];
+  String? filtroResponsavel; // Adicionado para o filtro
   late TarefasFavoritasRepository favoritas;
-  late TarefasRepository tarefasRepo;
 
   mostrarConfiguracoes() {
     Navigator.push(
@@ -143,21 +144,23 @@ class _TarefasPageState extends State<TarefasPage> {
   }
 
   excluirTarefa(Tarefa tarefa) {
-    setState(() {
-      TarefasRepository.tabela.remove(tarefa);
-      mostrarSnackBar('Tarefa excluída com sucesso!'); // Exibe o SnackBar aqui
-    });
-  }
-
-  sortData(tabela) {
-    tabela.sort((Tarefa a, Tarefa b) => a.data.compareTo(b.data));
+    final tarefasRepo = Provider.of<TarefasRepository>(context, listen: false);
+    tarefasRepo.removerTarefa(tarefa.responsavel, tarefa);
+    mostrarSnackBar('Tarefa excluída com sucesso!'); // Exibe o SnackBar aqui
   }
 
   @override
   Widget build(BuildContext context) {
     favoritas = Provider.of<TarefasFavoritasRepository>(context);
-    List<Tarefa> tabela = TarefasRepository.tabela;
-    sortData(tabela);
+    final tarefasRepo = Provider.of<TarefasRepository>(context);
+    final casasRepo =
+        Provider.of<CasasRepository>(context); // Obtendo o casasRepository
+
+    // Verificando se senhaCasaAtual é nula antes de usá-la
+    final senhaCasa = casasRepo.senhaCasaAtual;
+
+    final membros =
+        casasRepo.obterMembrosDaCasa(); // Obtém os membros para o filtro
 
     return Scaffold(
       appBar: appBarDinamica(),
@@ -179,44 +182,88 @@ class _TarefasPageState extends State<TarefasPage> {
           ],
         ),
       ),
-      body: tabela.isEmpty
-          ? const Center(
-              child: Text(
-                'Não existem tarefas',
-                style: TextStyle(fontSize: 18),
-              ),
-            )
-          : ListView.builder(
-              itemCount: tabela.length,
-              itemBuilder: (BuildContext context, int index) {
-                final tarefa = tabela[index];
-                return TarefaCard(
-                  tarefa: tarefa,
-                  selecionadas: selecionadas,
-                  onTap: (Tarefa tarefa) {
-                    selecionadas.isEmpty
-                        ? mostrarDetalhes(tarefa)
-                        : setState(() {
-                            (selecionadas.contains(tarefa))
-                                ? selecionadas.remove(tarefa)
-                                : selecionadas.add(tarefa);
-                          });
-                  },
-                  onLongPress: (Tarefa tarefa) {
-                    setState(() {
-                      (selecionadas.contains(tarefa))
-                          ? selecionadas.remove(tarefa)
-                          : selecionadas.add(tarefa);
-                    });
-                  },
-                  onDelete: (Tarefa tarefa) {
-                    excluirTarefa(tarefa);
-                    mostrarSnackBar(
-                        'Tarefa "${tarefa.nome}" excluída com sucesso!');
-                  },
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: DropdownButtonFormField<String>(
+              value: filtroResponsavel,
+              decoration:
+                  const InputDecoration(labelText: 'Filtrar por responsável'),
+              items: membros.map((membro) {
+                return DropdownMenuItem<String>(
+                  value: membro,
+                  child: Text(membro),
                 );
+              }).toList(),
+              onChanged: (valor) {
+                setState(() {
+                  filtroResponsavel = valor;
+                });
               },
             ),
+          ),
+          Expanded(
+            child: StreamBuilder<List<Tarefa>>(
+              stream: tarefasRepo.getTarefasPorSenhaCasa(senhaCasa),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (snapshot.hasError) {
+                  return Center(child: Text('Erro: ${snapshot.error}'));
+                }
+
+                final tarefas = snapshot.data ?? [];
+                final tarefasFiltradas = tarefas.where((tarefa) {
+                  return filtroResponsavel == null ||
+                      tarefa.responsavel == filtroResponsavel;
+                }).toList();
+
+                return tarefasFiltradas.isEmpty
+                    ? const Center(
+                        child: Text(
+                          'Não existem tarefas',
+                          style: TextStyle(fontSize: 18),
+                        ),
+                      )
+                    : ListView.builder(
+                        itemCount: tarefasFiltradas.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          final tarefa = tarefasFiltradas[index];
+                          return TarefaCard(
+                            tarefa: tarefa,
+                            selecionadas: selecionadas,
+                            onTap: (Tarefa tarefa) {
+                              selecionadas.isEmpty
+                                  ? mostrarDetalhes(tarefa)
+                                  : setState(() {
+                                      (selecionadas.contains(tarefa))
+                                          ? selecionadas.remove(tarefa)
+                                          : selecionadas.add(tarefa);
+                                    });
+                            },
+                            onLongPress: (Tarefa tarefa) {
+                              setState(() {
+                                (selecionadas.contains(tarefa))
+                                    ? selecionadas.remove(tarefa)
+                                    : selecionadas.add(tarefa);
+                              });
+                            },
+                            onDelete: (Tarefa tarefa) {
+                              excluirTarefa(tarefa);
+                              mostrarSnackBar(
+                                  'Tarefa "${tarefa.nome}" excluída com sucesso!');
+                            },
+                          );
+                        },
+                      );
+              },
+            ),
+          ),
+        ],
+      ),
       floatingActionButton: Align(
         alignment: Alignment.bottomRight,
         child: Row(
@@ -238,11 +285,9 @@ class _TarefasPageState extends State<TarefasPage> {
                           int tarefasRemovidas =
                               0; // Contador para tarefas removidas
                           for (var tarefa in List.from(selecionadas)) {
-                            // Usar List.from para evitar modificar a lista durante a iteração
-                            if (tabela.contains(tarefa)) {
-                              tabela.remove(tarefa);
-                              tarefasRemovidas++;
-                            }
+                            tarefasRepo.removerTarefa(
+                                tarefa.responsavel, tarefa);
+                            tarefasRemovidas++;
                           }
                           limparSelecionadas();
 
@@ -265,19 +310,13 @@ class _TarefasPageState extends State<TarefasPage> {
                       builder: (context) => const NovaTarefaPage()),
                 );
 
-                // Se uma nova tarefa foi criada, atualize a tela
+                // Se uma nova tarefa foi criada, adicione-a ao repositório
                 if (novaTarefa != null) {
-                  setState(() {
-                    // Adicione a nova tarefa à lista
-                    TarefasRepository.tabela.add(novaTarefa);
-                  });
-
-                  // Mostrar SnackBar informando que a tarefa foi criada
+                  tarefasRepo.criarTarefa(senhaCasa, novaTarefa);
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
                           'Tarefa "${novaTarefa.nome}" criada com sucesso!'),
-                      duration: const Duration(seconds: 2),
                     ),
                   );
                 }

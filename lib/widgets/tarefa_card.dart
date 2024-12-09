@@ -82,10 +82,6 @@ class TarefaCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.delete, color: Colors.red),
-                    onPressed: () => onDelete(tarefa),
-                  ),
                 ],
               ),
             ),

@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:projeto_dispositivos_moveis/repositories/casas_repository.dart';
+import 'package:projeto_dispositivos_moveis/repositories/tarefas_repository.dart';
 import 'package:projeto_dispositivos_moveis/services/auth_service.dart';
 import 'package:provider/provider.dart';
 import 'repositories/tarefas_favoritas_repository.dart';
@@ -17,6 +18,9 @@ void main() async {
       MultiProvider(
         providers: [
           ChangeNotifierProvider(create: (context) => AuthService()),
+          ChangeNotifierProvider(
+              create: (context) =>
+                  TarefasRepository(auth: context.read<AuthService>())),
           ChangeNotifierProvider(
               create: (context) => CasasRepository(
                     auth: context.read<AuthService>(),

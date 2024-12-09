@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../models/tarefa.dart';
+import '../repositories/casas_repository.dart';
 import '../repositories/tarefas_repository.dart';
-import '../widgets/tarefa_card.dart';
 import '../pages/tarefas_descricao_page.dart';
+import '../widgets/tarefa_card.dart';
 
 class CalendarioCard extends StatefulWidget {
   final DateTime selectedDate;
@@ -16,20 +17,10 @@ class CalendarioCard extends StatefulWidget {
 }
 
 class _CalendarioCardState extends State<CalendarioCard> {
-  List<Tarefa> selecionadas =
-      []; // Lista para armazenar as tarefas selecionadas
+  List<Tarefa> selecionadas = [];
+  String? _filtroUsername; // Filtro por username
 
-  List<Tarefa> _getTarefasForSelectedDate() {
-    // Filtra as tarefas pela data selecionada
-    return TarefasRepository.tabela.where((tarefa) {
-      return tarefa.data.year == widget.selectedDate.year &&
-          tarefa.data.month == widget.selectedDate.month &&
-          tarefa.data.day == widget.selectedDate.day;
-    }).toList();
-  }
-
-  // Função para mostrar os detalhes da tarefa
-  mostrarDetalhes(Tarefa tarefa) {
+  void mostrarDetalhes(Tarefa tarefa) {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -38,39 +29,22 @@ class _CalendarioCardState extends State<CalendarioCard> {
     );
   }
 
-  // Função para excluir tarefas selecionadas
-  excluirTarefas() {
-    setState(() {
-      for (var tarefa in List.from(selecionadas)) {
-        if (TarefasRepository.tabela.contains(tarefa)) {
-          TarefasRepository.tabela.remove(tarefa);
-        }
-      }
-      selecionadas.clear();
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Tarefas excluídas com sucesso!')),
-    );
-  }
-
-  // Função para exibir o diálogo de confirmação
-  showAlertDialog(BuildContext context, Function onConfirm) {
+  void showAlertDialog(BuildContext context, Function onConfirm) {
     Widget cancelaButton = TextButton(
       child: const Text("Cancelar"),
       onPressed: () {
-        Navigator.of(context).pop(); // Fecha o diálogo
+        Navigator.of(context).pop();
       },
     );
 
     Widget continuaButton = TextButton(
       child: const Text("Continuar"),
       onPressed: () {
-        onConfirm(); // Chama a função de confirmação
-        Navigator.of(context).pop(); // Fecha o diálogo
+        onConfirm();
+        Navigator.of(context).pop();
       },
     );
 
-    // Configura o AlertDialog
     AlertDialog alert = AlertDialog(
       title: const Text("Confirmação"),
       content: const Text("Deseja realmente excluir as tarefas selecionadas?"),
@@ -80,7 +54,6 @@ class _CalendarioCardState extends State<CalendarioCard> {
       ],
     );
 
-    // Exibe o diálogo
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -91,83 +64,133 @@ class _CalendarioCardState extends State<CalendarioCard> {
 
   @override
   Widget build(BuildContext context) {
-    // Obtém as tarefas para a data selecionada
-    final tarefas = _getTarefasForSelectedDate();
+    final casasRepo = Provider.of<CasasRepository>(context);
+    final tarefasRepo = Provider.of<TarefasRepository>(context);
+    final senhaCasa = casasRepo.senhaCasaAtual;
     final formattedDate =
         DateFormat('EEEE, dd \'de\' MMMM', 'pt_BR').format(widget.selectedDate);
+
+    // Lista de membros da casa para o filtro
+    final membros = casasRepo.obterMembrosDaCasa();
 
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
         title: Text(formattedDate),
       ),
-      body: tarefas.isEmpty
-          ? const Center(child: Text('Nenhuma tarefa para esta data'))
-          : ListView.builder(
-              itemCount: tarefas.length,
-              itemBuilder: (context, index) {
-                final tarefa = tarefas[index];
-                return TarefaCard(
-                  tarefa: tarefa,
-                  selecionadas: selecionadas,
-                  onTap: (Tarefa tarefa) {
-                    if (selecionadas.isEmpty) {
-                      mostrarDetalhes(
-                          tarefa); // Vai para a tela de detalhes se não houver seleção
-                    } else {
-                      setState(() {
-                        if (selecionadas.contains(tarefa)) {
-                          selecionadas
-                              .remove(tarefa); // Remove a tarefa da seleção
+      body: Column(
+        children: [
+          // Dropdown para o filtro por responsável
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: DropdownButtonFormField<String>(
+              value: _filtroUsername,
+              decoration:
+                  const InputDecoration(labelText: 'Filtrar por responsável'),
+              items: membros.map((membro) {
+                return DropdownMenuItem<String>(
+                  value: membro,
+                  child: Text(membro),
+                );
+              }).toList(),
+              onChanged: (valor) {
+                setState(() {
+                  _filtroUsername = valor;
+                });
+              },
+            ),
+          ),
+          Expanded(
+            child: FutureBuilder<List<Tarefa>>(
+              future: tarefasRepo.getTarefasPorSenhaCasa(senhaCasa).first,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text('Erro: ${snapshot.error}'));
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(
+                      child: Text('Nenhuma tarefa para esta data'));
+                }
+
+                // Filtrar tarefas pela data selecionada e pelo responsável
+                final tarefasFiltradas = snapshot.data!.where((tarefa) {
+                  final isSameDate =
+                      tarefa.data.year == widget.selectedDate.year &&
+                          tarefa.data.month == widget.selectedDate.month &&
+                          tarefa.data.day == widget.selectedDate.day;
+                  final matchesFilter = _filtroUsername == null ||
+                      tarefa.responsavel == _filtroUsername;
+
+                  return isSameDate && matchesFilter;
+                }).toList();
+
+                if (tarefasFiltradas.isEmpty) {
+                  return const Center(
+                      child: Text('Nenhuma tarefa para esta data'));
+                }
+
+                return ListView.builder(
+                  itemCount: tarefasFiltradas.length,
+                  itemBuilder: (context, index) {
+                    final tarefa = tarefasFiltradas[index];
+                    return TarefaCard(
+                      tarefa: tarefa,
+                      selecionadas: selecionadas,
+                      onTap: (tarefa) {
+                        if (selecionadas.isEmpty) {
+                          mostrarDetalhes(tarefa);
                         } else {
-                          selecionadas
-                              .add(tarefa); // Adiciona a tarefa à seleção
+                          setState(() {
+                            if (selecionadas.contains(tarefa)) {
+                              selecionadas.remove(tarefa);
+                            } else {
+                              selecionadas.add(tarefa);
+                            }
+                          });
                         }
-                      });
-                    }
-                  },
-                  onLongPress: (Tarefa tarefa) {
-                    setState(() {
-                      if (selecionadas.contains(tarefa)) {
-                        selecionadas
-                            .remove(tarefa); // Remove a tarefa da seleção
-                      } else {
-                        selecionadas.add(tarefa); // Adiciona a tarefa à seleção
-                      }
-                    });
-                  },
-                  onDelete: (Tarefa tarefa) {
-                    excluirTarefas(); // Passa a função para excluir a tarefa
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content:
-                          Text('Tarefa "${tarefa.nome}" excluída com sucesso!'),
-                    ));
+                      },
+                      onLongPress: (tarefa) {
+                        setState(() {
+                          if (selecionadas.contains(tarefa)) {
+                            selecionadas.remove(tarefa);
+                          } else {
+                            selecionadas.add(tarefa);
+                          }
+                        });
+                      },
+                      onDelete: (tarefa) {
+                        showAlertDialog(context, () async {
+                          await tarefasRepo.removerTarefa(senhaCasa, tarefa);
+                          setState(() {});
+                        });
+                      },
+                    );
                   },
                 );
               },
             ),
-      floatingActionButton: Align(
-        alignment: Alignment.bottomRight,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Mostrar o botão de remover se houver tarefas selecionadas
-            selecionadas.isNotEmpty
-                ? FloatingActionButton.extended(
-                    icon: const Icon(Icons.delete),
-                    label: const Text(
-                      'Remover',
-                      style: TextStyle(letterSpacing: 0),
-                    ),
-                    onPressed: () {
-                      showAlertDialog(context,
-                          excluirTarefas); // Exibe o diálogo de confirmação
-                    },
-                  )
-                : const SizedBox(width: 0),
-          ],
-        ),
+          ),
+        ],
       ),
+      floatingActionButton: selecionadas.isNotEmpty
+          ? FloatingActionButton.extended(
+              icon: const Icon(Icons.delete),
+              label: const Text('Remover'),
+              onPressed: () {
+                showAlertDialog(context, () async {
+                  final tarefasRepo =
+                      Provider.of<TarefasRepository>(context, listen: false);
+                  for (var tarefa in selecionadas) {
+                    await tarefasRepo.removerTarefa(senhaCasa, tarefa);
+                  }
+                  setState(() {
+                    selecionadas.clear();
+                  });
+                });
+              },
+            )
+          : null,
     );
   }
 }

@@ -23,34 +23,49 @@ class CasasRepository extends ChangeNotifier {
     db = DBFirestore.get();
   }
 
+  String _senhaCasaAtual = '';
+
+  String get senhaCasaAtual => _senhaCasaAtual;
+
+  set senhaCasaAtual(String senha) {
+    _senhaCasaAtual = senha;
+    notifyListeners();
+  }
+
   UnmodifiableListView<Casa> get lista => UnmodifiableListView(_lista);
 
   // Criar casa
-  // Método para criar uma nova casa
   criarCasa(Casa casa) async {
     _lista.add(casa);
 
     try {
-      // Criar um documento para a casa dentro da coleção global "casas"
       await db.collection('casas').add({
-        'nome': casa.nome, // Nome da casa
-        'criador': casa.criador, // Nome do criador da casa
-        'membros': casa
-            .membros, // Lista de membros da casa (inicialmente com o criador)
-        'senha': casa.senha, // Senha da casa
+        'nome': casa.nome,
+        'criador': casa.criador,
+        'membros': casa.membros,
+        'senha': casa.senha,
       });
-
-      // Após criar a casa, você pode adicionar o criador à lista de membros (se não foi feito)
-      // No caso do criador, ele já estará na lista de membros devido ao campo casa.membros
+      _senhaCasaAtual = casa.senha;
       notifyListeners();
     } catch (e) {
       print("Erro ao criar a casa: $e");
     }
   }
 
-  // Método para o usuário entrar em uma casa usando a senha
+  // Método para obter os membros da casa com base na senha
+  List<String> obterMembrosDaCasa() {
+    final casaAtual = _lista.firstWhere(
+      (casa) => casa.senha == _senhaCasaAtual,
+      orElse: () => Casa(senha: '', nome: '', criador: '', membros: []),
+    );
+    return casaAtual.membros;
+  }
+
+  // Método para o usuário entrar em uma casa
+  // Método para o usuário entrar em uma casa
   entrarEmCasa(String senhaCasa) async {
     try {
+      // Obter o username do usuário logado
       final doc = await FirebaseFirestore.instance
           .collection('usuarios')
           .doc(auth.usuario!.uid)
@@ -58,35 +73,47 @@ class CasasRepository extends ChangeNotifier {
       final usernameLogado = doc.data()?['username'];
 
       if (usernameLogado == null) {
-        // Se o username do usuário logado não for encontrado
         return false;
       }
 
-      // Busca todas as casas na coleção global "casas"
+      // Obter todas as casas do Firestore
       final casasSnapshot =
           await FirebaseFirestore.instance.collection('casas').get();
 
-      // Percorre todas as casas para verificar se a senha da casa bate
       for (var casaDoc in casasSnapshot.docs) {
         final casaData = casaDoc.data();
         final casaSenha = casaData['senha'];
 
+        // Verifica se a senha corresponde à casa
         if (casaSenha == senhaCasa) {
-          // Se a senha corresponder, o usuário entra na casa
+          _senhaCasaAtual = senhaCasa;
+          notifyListeners();
+
+          // Atualiza os membros no Firestore
           await FirebaseFirestore.instance
               .collection('casas')
               .doc(casaDoc.id)
               .update({
-            'membros': FieldValue.arrayUnion(
-                [usernameLogado]), // Adiciona o username na lista de membros
+            'membros': FieldValue.arrayUnion([usernameLogado]),
           });
 
-          // Ação concluída com sucesso
+          // Atualiza a lista localmente
+          final casaIndex =
+              _lista.indexWhere((casa) => casa.senha == senhaCasa);
+
+          if (casaIndex != -1) {
+            // Atualiza a casa existente
+            _lista[casaIndex].membros.add(usernameLogado);
+          } else {
+            // Exibe um Snackbar informando o erro
+            return false;
+          }
+
+          notifyListeners();
           return true;
         }
       }
 
-      // Caso a senha não seja encontrada em nenhuma casa
       return false;
     } catch (e) {
       print('Erro ao tentar entrar na casa: $e');
