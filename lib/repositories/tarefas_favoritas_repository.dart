@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/tarefa.dart';
 
 class TarefasFavoritasRepository extends ChangeNotifier {
-  List<Tarefa> _lista = [];
+  final List<Tarefa> _lista = [];
   UnmodifiableListView<Tarefa> get lista => UnmodifiableListView(_lista);
 
   saveAll(List<Tarefa> tarefas) {

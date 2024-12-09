@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../repositories/tarefas_repository.dart';
 import '../widgets/calendario_card.dart';
+import '../models/tarefa.dart';
 import 'configuracoes_page.dart';
 
 class CalendarioPage extends StatefulWidget {
@@ -13,7 +14,7 @@ class CalendarioPage extends StatefulWidget {
 
 class _CalendarioPageState extends State<CalendarioPage> {
   DateTime? _selectedDate;
-  DateTime _focusedDay = DateTime.now();
+  DateTime _focusedDay = DateTime.now(); // Mantenha o estado do mês focado
 
   int _getTarefasCountForDay(DateTime day) {
     return TarefasRepository.tabela.where((tarefa) {
@@ -21,6 +22,18 @@ class _CalendarioPageState extends State<CalendarioPage> {
           tarefa.data.month == day.month &&
           tarefa.data.day == day.day;
     }).length;
+  }
+
+  List<Tarefa> _getTarefasPassadas() {
+    return TarefasRepository.tabela
+        .where((tarefa) => tarefa.data.isBefore(DateTime.now()))
+        .toList();
+  }
+
+  List<Tarefa> _getTarefasPendentes() {
+    return TarefasRepository.tabela
+        .where((tarefa) => !tarefa.data.isBefore(DateTime.now()))
+        .toList();
   }
 
   mostrarConfiguracoes() {
@@ -50,9 +63,8 @@ class _CalendarioPageState extends State<CalendarioPage> {
           children: [
             ListTile(
               leading: const Padding(
-                padding: EdgeInsets.only(
-                    right: 8.0), // Adiciona um padding à direita do ícone
-                child: Icon(Icons.settings), // Ícone de engrenagem
+                padding: EdgeInsets.only(right: 8.0),
+                child: Icon(Icons.settings),
               ),
               title: const Text('Configurações'),
               onTap: () {
@@ -68,15 +80,14 @@ class _CalendarioPageState extends State<CalendarioPage> {
             firstDay: DateTime(2020),
             lastDay: DateTime(2030),
             locale: 'pt_BR',
-            focusedDay: _focusedDay, // Use a data focada
+            focusedDay: _focusedDay,
             selectedDayPredicate: (day) => isSameDay(day, _selectedDate),
             onDaySelected: (selectedDay, focusedDay) {
               setState(() {
                 _selectedDate = selectedDay;
-                _focusedDay =
-                    selectedDay; // Atualize o mês focado para a data selecionada
+                _focusedDay = selectedDay;
               });
-              // Navegar para a DisplayDateScreen ao selecionar uma data
+
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -121,9 +132,88 @@ class _CalendarioPageState extends State<CalendarioPage> {
                           ),
                         ),
                       ),
+                    Positioned(
+                      left: 1,
+                      top: 1,
+                      child: tarefasCount == 0
+                          ? const Icon(
+                              Icons.add_task,
+                              size: 12,
+                              color: Colors.green,
+                            )
+                          : const SizedBox.shrink(),
+                    ),
                   ],
                 );
               },
+            ),
+          ),
+          const SizedBox(height: 16),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Tarefas Passadas:",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    ..._getTarefasPassadas().map((tarefa) => Card(
+                          color: Colors.red[100],
+                          elevation: 3,
+                          child: ListTile(
+                            leading:
+                                const Icon(Icons.history, color: Colors.red),
+                            title: Text(
+                              tarefa.nome,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.red[900],
+                              ),
+                            ),
+                            subtitle: Text(
+                              "${tarefa.data.day}/${tarefa.data.month}/${tarefa.data.year}",
+                              style: TextStyle(color: Colors.red[700]),
+                            ),
+                          ),
+                        )),
+                    const SizedBox(height: 16),
+                    const Text(
+                      "Tarefas Pendentes:",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    ..._getTarefasPendentes().map((tarefa) => Card(
+                          color: Colors.green[100],
+                          elevation: 3,
+                          child: ListTile(
+                            leading:
+                                const Icon(Icons.pending, color: Colors.green),
+                            title: Text(
+                              tarefa.nome,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.green[900],
+                              ),
+                            ),
+                            subtitle: Text(
+                              "${tarefa.data.day}/${tarefa.data.month}/${tarefa.data.year}",
+                              style: TextStyle(color: Colors.green[700]),
+                            ),
+                          ),
+                        )),
+                  ],
+                ),
+              ),
             ),
           ),
         ],

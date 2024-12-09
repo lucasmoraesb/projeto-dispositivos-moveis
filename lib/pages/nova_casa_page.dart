@@ -5,8 +5,6 @@ import 'package:projeto_dispositivos_moveis/services/auth_service.dart';
 import 'package:provider/provider.dart';
 import '../controllers/paginas_controller.dart';
 import '../models/casa.dart';
-import '../models/tarefa.dart';
-import '../repositories/tarefas_repository.dart';
 
 class NovaCasaPage extends StatefulWidget {
   const NovaCasaPage({super.key});

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import '../models/tarefa.dart';
-import '../repositories/tarefas_repository.dart';
 
 class NovaTarefaPage extends StatefulWidget {
   const NovaTarefaPage({super.key});

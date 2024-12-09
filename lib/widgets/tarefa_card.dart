@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/tarefa.dart';
 import '../repositories/tarefas_favoritas_repository.dart';
-import '../repositories/tarefas_repository.dart';
 
 class TarefaCard extends StatelessWidget {
   final Tarefa tarefa;

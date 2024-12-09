@@ -5,8 +5,6 @@ import 'package:projeto_dispositivos_moveis/pages/acao_casa_page.dart';
 import 'package:projeto_dispositivos_moveis/services/auth_service.dart';
 import 'package:provider/provider.dart';
 
-import 'nova_casa_page.dart';
-
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
