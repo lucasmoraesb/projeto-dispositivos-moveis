@@ -73,7 +73,7 @@ class _CalendarioPageState extends State<CalendarioPage> {
                     Center(
                       child: Text(
                         '${day.day}',
-                        style: TextStyle(color: Colors.black),
+                        style: const TextStyle(color: Colors.black),
                       ),
                     ),
                     if (tarefasCount > 0)
@@ -125,7 +125,8 @@ class _CalendarioPageState extends State<CalendarioPage> {
                           color: Colors.red[100],
                           elevation: 3,
                           child: ListTile(
-                            leading: Icon(Icons.history, color: Colors.red),
+                            leading:
+                                const Icon(Icons.history, color: Colors.red),
                             title: Text(
                               tarefa.nome,
                               style: TextStyle(
@@ -152,7 +153,8 @@ class _CalendarioPageState extends State<CalendarioPage> {
                           color: Colors.green[100],
                           elevation: 3,
                           child: ListTile(
-                            leading: Icon(Icons.pending, color: Colors.green),
+                            leading:
+                                const Icon(Icons.pending, color: Colors.green),
                             title: Text(
                               tarefa.nome,
                               style: TextStyle(
