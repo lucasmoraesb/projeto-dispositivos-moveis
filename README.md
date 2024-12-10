@@ -1,4 +1,6 @@
-Projeto Mobile
+## Projeto Mobile - Tarefas domésticas
+
+### Entrega 2 - Banco de dados, Login
 
 Este repositório contém um aplicativo mobile desenvolvido em Flutter para ajudar no gerenciamento de tarefas domésticas de forma prática e organizada.
 
@@ -7,7 +9,8 @@ Este repositório contém um aplicativo mobile desenvolvido em Flutter para ajud
 - Adição e remoção de tarefas do dia-a-dia.
 - Visualização de tarefas e conclusão de tarefas.
 - Organização por data e calendário.
-- Favoritar tarefas com o status incluso.
+- Entrada e saída de uma casa.
+- Adição de tarefas relacionadas aos usuários da casa.
 
 ## Tecnologias Utilizadas
 
@@ -15,12 +18,13 @@ Este repositório contém um aplicativo mobile desenvolvido em Flutter para ajud
 - table_calendar : Componente de calendário para organização das tarefas.
 - Intl : Suporte a internacionalização.
 - Provider : Gerenciamento de estado.
+- Firebase : Banco de dados online para as operações de usuários e casas com as tarefas.
 
 ### Desenvolvedores
 
-- Gabriel Camlofski Horst
-- Lucas Moraes Borges
-- Gustavo Henrique Amaral Costa
+- Gabriel Camlofski Horst.
+- Lucas de Moraes Borges.
+- Gustavo Henrique Amaral Costa.
 
 ### Instalação
 
@@ -40,23 +44,23 @@ dependencies:
   provider: ^5.0.0
   table_calendar: ^3.1.2
   intl: ^0.19.0
+  firebase_core: "^3.8.0"
+  firebase_auth: "^5.3.3"
+  cloud_firestore: ^5.5.1
 ```
 
 - As dependências do arquivo `pubspec.yaml`.
 
 ### Desenvolvimento da Equipe
 
-- Gabriel Camlofski Horst : CRUD das tarefas e UI delas.
-- Lucas Moraes Borges : Calendário dinâmico com os dias de tarefas.
-- Gustavo Henrique Amaral : Estrutura do projeto, manutenção e os merges.
+- Gabriel Camlofski Horst : Desenvolvimento das entregas, correção do calendário e implementações.
+- Lucas de Moraes Borges : Desenvolvimento das entregas, banco de dados e implementação do banco no projeto.
+- Gustavo Henrique Amaral : Estrutura inicial do projeto e das entregas.
 
 ### Bugs - Erros
 
-- SetState estático, sem o uso total do provider, algumas partes usamos provider.
-- Falta de uma indicação no calendário de tarefas.
-- Quando conclui uma tarefa ele não atualiza direto na tela, problema no SetState.
+- Seleção de tarefa sem a mudança do ícone.
 
 ### Funcionalidades faltantes
 
-- "Alguma coisa a mais" na parte do calendário.
-- Edição de data e nome da tarefa.
+- Implementação de um usuario id para o banco de dados.
