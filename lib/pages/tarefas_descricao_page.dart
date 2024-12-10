@@ -52,6 +52,71 @@ class _TarefasDescricaoPageState extends State<TarefasDescricaoPage> {
     }
   }
 
+  desconcluirTarefa() async {
+    if (_form.currentState!.validate()) {
+      final tarefasRepo =
+          Provider.of<TarefasRepository>(context, listen: false);
+      final senhaCasa =
+          Provider.of<CasasRepository>(context, listen: false).senhaCasaAtual;
+
+      try {
+        // Atualiza no Firestore
+        await tarefasRepo.desconcluirTarefaUpdate(
+          senhaCasa,
+          widget.tarefa,
+          _valorDescricao.text,
+        );
+
+        // Atualiza localmente
+        setState(() {
+          widget.tarefa.status = 'Não concluída';
+          widget.tarefa.descricao = _valorDescricao.text;
+        });
+
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Tarefa desconcluida com sucesso')),
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro: ${e.toString()}')),
+        );
+      }
+    }
+  }
+
+  editarTarefa() async {
+    if (_form.currentState!.validate()) {
+      final tarefasRepo =
+          Provider.of<TarefasRepository>(context, listen: false);
+      final senhaCasa =
+          Provider.of<CasasRepository>(context, listen: false).senhaCasaAtual;
+
+      try {
+        // Atualiza no Firestore
+        await tarefasRepo.concluirTarefaUpdate(
+          senhaCasa,
+          widget.tarefa,
+          _valorDescricao.text,
+        );
+
+        // Atualiza localmente
+        setState(() {
+          widget.tarefa.descricao = _valorDescricao.text;
+        });
+
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Descrição alterada com sucesso')),
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro: ${e.toString()}')),
+        );
+      }
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -68,7 +133,7 @@ class _TarefasDescricaoPageState extends State<TarefasDescricaoPage> {
           fontSize: 25,
         ),
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -132,6 +197,60 @@ class _TarefasDescricaoPageState extends State<TarefasDescricaoPage> {
                         padding: EdgeInsets.all(16),
                         child: Text(
                           'Concluir Tarefa',
+                          style: TextStyle(fontSize: 20),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ] else ...[
+              Form(
+                key: _form,
+                child: TextFormField(
+                  controller: _valorDescricao,
+                  style: const TextStyle(fontSize: 20),
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: 'Descrição',
+                    prefixIcon: Icon(Icons.keyboard),
+                  ),
+                  keyboardType: TextInputType.text,
+                ),
+              ),
+              Container(
+                alignment: Alignment.bottomCenter,
+                margin: const EdgeInsets.only(top: 24),
+                child: ElevatedButton(
+                  onPressed: editarTarefa,
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.edit),
+                      Padding(
+                        padding: EdgeInsets.all(16),
+                        child: Text(
+                          'Atualizar Descrição',
+                          style: TextStyle(fontSize: 20),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Container(
+                alignment: Alignment.bottomCenter,
+                margin: const EdgeInsets.only(top: 24),
+                child: ElevatedButton(
+                  onPressed: desconcluirTarefa,
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.edit),
+                      Padding(
+                        padding: EdgeInsets.all(16),
+                        child: Text(
+                          'Desconcluir Tarefa',
                           style: TextStyle(fontSize: 20),
                         ),
                       ),

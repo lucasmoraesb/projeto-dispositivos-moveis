@@ -256,6 +256,46 @@ class TarefasRepository extends ChangeNotifier {
     }
   }
 
+  Future<void> desconcluirTarefaUpdate(
+      String senhaCasa, Tarefa tarefa, String novaDescricao) async {
+    try {
+      // Busca a casa pelo código da senha
+      final querySnapshot = await db
+          .collection('casas')
+          .where('senha', isEqualTo: senhaCasa)
+          .get();
+
+      if (querySnapshot.docs.isEmpty) {
+        throw Exception("Nenhuma casa encontrada com a senha fornecida.");
+      }
+
+      final casaId = querySnapshot.docs.first.id;
+
+      // Busca a tarefa correspondente
+      final tarefasSnapshot = await db
+          .collection('casas')
+          .doc(casaId)
+          .collection('tarefas')
+          .where('nome', isEqualTo: tarefa.nome)
+          .where('data', isEqualTo: tarefa.data.toIso8601String())
+          .get();
+
+      if (tarefasSnapshot.docs.isNotEmpty) {
+        // Atualiza a tarefa no Firestore
+        await tarefasSnapshot.docs.first.reference.update({
+          'status': 'Não concluída',
+          'descricao': novaDescricao,
+        });
+        notifyListeners();
+      } else {
+        throw Exception("Tarefa não encontrada para atualização.");
+      }
+    } catch (e) {
+      print("Erro ao desconcluir a tarefa: $e");
+      throw Exception("Erro ao desconcluir a tarefa: $e");
+    }
+  }
+
   // Método para remover uma tarefa da lista
   remove(Tarefa tarefa) {
     _lista.remove(tarefa);

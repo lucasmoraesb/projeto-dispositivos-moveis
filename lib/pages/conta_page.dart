@@ -1,8 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../repositories/casas_repository.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ContaPage extends StatelessWidget {
   const ContaPage({super.key});
@@ -32,6 +32,7 @@ class ContaPage extends StatelessWidget {
 
     final email = user?.email ?? "Email não disponível";
     final casa = casasRepository.casaAtual?.nome ?? "Nenhuma casa associada";
+    final membrosCasa = casasRepository.obterMembrosDaCasa();
 
     return Scaffold(
       appBar: AppBar(
@@ -86,7 +87,24 @@ class ContaPage extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.home),
               title: const Text("Casa"),
-              subtitle: Text(casa),
+              subtitle: Row(
+                children: [
+                  Expanded(
+                    child: Text(casa), // Exibe o nome da casa
+                  ),
+                  const SizedBox(width: 8),
+                  if (membrosCasa.isNotEmpty) ...[
+                    const Text(
+                      "Membros: ",
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    ...membrosCasa.map((membro) => Text('$membro ')),
+                  ] else ...[
+                    const Text("Nenhum membro."),
+                  ],
+                ],
+              ),
             ),
           ],
         ),
