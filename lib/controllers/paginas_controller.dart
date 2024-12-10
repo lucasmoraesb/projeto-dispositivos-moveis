@@ -37,7 +37,7 @@ class _PaginasControllerState extends State<PaginasController> {
           HomePage(),
           CalendarioPage(), // Página de calendário
           TarefasPage(),
-          FavoritasPage(),
+          //FavoritasPage(),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -52,7 +52,7 @@ class _PaginasControllerState extends State<PaginasController> {
           BottomNavigationBarItem(
               icon: Icon(Icons.calendar_today), label: 'Calendário'),
           BottomNavigationBarItem(icon: Icon(Icons.list), label: 'Todas'),
-          BottomNavigationBarItem(icon: Icon(Icons.star), label: 'Favoritas'),
+          //BottomNavigationBarItem(icon: Icon(Icons.star), label: 'Favoritas'),
         ],
         onTap: (pagina) {
           pc.animateToPage(pagina,

@@ -16,7 +16,12 @@ class AcaoCasaPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
+        iconTheme: const IconThemeData(color: Color(0xFFFFFFFF)),
         title: const Text('Escolher ou Criar Casa'),
+        titleTextStyle: const TextStyle(
+          color: Color(0xFFFFFFFF),
+          fontSize: 25,
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

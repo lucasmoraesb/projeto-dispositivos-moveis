@@ -28,7 +28,12 @@ class _NovaCasaPageState extends State<NovaCasaPage> {
 
     return Scaffold(
       appBar: AppBar(
+        iconTheme: const IconThemeData(color: Color(0xFFFFFFFF)),
         title: const Text('Nova Casa'),
+        titleTextStyle: const TextStyle(
+          color: Color(0xFFFFFFFF),
+          fontSize: 25,
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

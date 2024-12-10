@@ -119,6 +119,21 @@ class AuthService extends ChangeNotifier {
       }
     } catch (e) {
       // Captura qualquer outro tipo de exceção
+      if (usuario != null) {
+        // Recupera o documento do Firestore para o usuário logado
+        final doc =
+            await _firestore.collection('usuarios').doc(usuario!.uid).get();
+        final data = doc.data();
+
+        if (data != null) {
+          final storedUsername = data['username'];
+
+          // Verifica se o username inserido corresponde ao registrado no Firestore
+          if (storedUsername != username) {
+            throw AuthException('Username incorreto. Tente novamente.');
+          }
+        }
+      }
       throw AuthException('Erro desconhecido: $e');
     }
   }

@@ -4,6 +4,7 @@ import '../repositories/tarefas_favoritas_repository.dart';
 import '../models/tarefa.dart';
 import '../repositories/tarefas_repository.dart';
 import '../pages/tarefas_descricao_page.dart';
+import 'conta_page.dart';
 import 'nova_tarefa_page.dart';
 import '../widgets/tarefa_card.dart';
 import '../pages/configuracoes_page.dart';
@@ -92,6 +93,15 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  mostrarConta() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const ContaPage(),
+      ),
+    );
+  }
+
   limparSelecionadas() {
     setState(() {
       selecionadas = [];
@@ -166,10 +176,33 @@ class _HomePageState extends State<HomePage> {
         child: ListView(
           children: [
             ListTile(
-              leading: const Icon(Icons.settings),
-              title: const Text('Configurações'),
+              leading: const Icon(
+                Icons.settings,
+                size: 30,
+              ),
+              title: const Text(
+                'Configurações',
+                style: TextStyle(
+                  fontSize: 18, // Aumenta o tamanho da fonte
+                ),
+              ),
               onTap: () {
                 mostrarConfiguracoes();
+              },
+            ),
+            ListTile(
+              leading: const Icon(
+                Icons.account_circle,
+                size: 30,
+              ),
+              title: const Text(
+                'Conta',
+                style: TextStyle(
+                  fontSize: 18, // Aumenta o tamanho da fonte
+                ),
+              ),
+              onTap: () {
+                mostrarConta();
               },
             ),
           ],

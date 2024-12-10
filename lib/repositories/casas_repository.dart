@@ -37,6 +37,13 @@ class CasasRepository extends ChangeNotifier {
     });
   }
 
+  Casa? get casaAtual {
+    return _lista.firstWhere(
+      (casa) => casa.senha == _senhaCasaAtual,
+      orElse: () => null as Casa, // Retorno explícito como nullable
+    );
+  }
+
   Future<void> _syncCasas() async {
     try {
       final casasSnapshot = await db.collection('casas').get();
@@ -177,8 +184,8 @@ class CasasRepository extends ChangeNotifier {
             _lista[casaIndex].membros.add(usernameLogado);
           } else {
             // Exibe um Snackbar informando o erro
-            print(_lista);
-            print("username ta zuado");
+            print(_lista.first.senha);
+            print(casaIndex);
             return false;
           }
 
@@ -190,6 +197,68 @@ class CasasRepository extends ChangeNotifier {
       return false;
     } catch (e) {
       print('Erro ao tentar entrar na casa: $e');
+      return false;
+    }
+  }
+
+  // Método para o usuário sair da casa atual
+  Future<bool> sairDaCasa() async {
+    try {
+      // Obter o usuário logado
+      final currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser == null) {
+        print("Erro: usuário não está logado.");
+        return false;
+      }
+
+      // Obter o nome de usuário do usuário logado
+      final usuarioSnapshot =
+          await db.collection('usuarios').doc(currentUser.uid).get();
+      final usernameLogado = usuarioSnapshot.data()?['username'];
+
+      if (usernameLogado == null) {
+        print("Erro: nome de usuário não encontrado.");
+        return false;
+      }
+
+      // Verificar a casa atual
+      if (casaAtual == null) {
+        print("Erro: o usuário não está em nenhuma casa.");
+        return false;
+      }
+
+      final casaDoc = await db
+          .collection('casas')
+          .where('senha', isEqualTo: _senhaCasaAtual)
+          .limit(1)
+          .get();
+
+      if (casaDoc.docs.isEmpty) {
+        print("Erro: casa não encontrada no Firestore.");
+        return false;
+      }
+
+      // Atualizar os membros no Firestore
+      final casaId = casaDoc.docs.first.id;
+      await db.collection('casas').doc(casaId).update({
+        'membros': FieldValue.arrayRemove([usernameLogado]),
+      });
+
+      // Atualizar a lista localmente
+      final casaIndex =
+          _lista.indexWhere((casa) => casa.senha == _senhaCasaAtual);
+      if (casaIndex != -1) {
+        _lista[casaIndex].membros.remove(usernameLogado);
+      }
+
+      // Limpar a casa atual do usuário
+      _senhaCasaAtual = '';
+      notifyListeners();
+
+      print("Usuário saiu da casa com sucesso.");
+      return true;
+    } catch (e) {
+      print("Erro ao sair da casa: $e");
       return false;
     }
   }
