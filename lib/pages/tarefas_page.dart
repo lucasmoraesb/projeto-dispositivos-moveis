@@ -35,7 +35,7 @@ class _TarefasPageState extends State<TarefasPage> {
       return AppBar(
         iconTheme: const IconThemeData(color: Color(0xFFFFFFFF)),
         centerTitle: true,
-        title: const Text('Minhas Tarefas'),
+        title: const Text('Tarefas'),
         titleTextStyle: const TextStyle(
           color: Color(0xFFFFFFFF),
           fontSize: 25,
@@ -74,9 +74,9 @@ class _TarefasPageState extends State<TarefasPage> {
           ),
         ],
         elevation: 2,
-        iconTheme: const IconThemeData(color: Colors.black87),
+        iconTheme: const IconThemeData(color: Color(0xFFFFFFFF)),
         titleTextStyle: const TextStyle(
-          color: Colors.black87,
+          color: Color(0xFFFFFFFF),
           fontSize: 25,
         ),
       );
@@ -271,12 +271,15 @@ class _TarefasPageState extends State<TarefasPage> {
           children: [
             selecionadas.isNotEmpty
                 ? FloatingActionButton.extended(
-                    icon: const Icon(Icons.delete),
+                    backgroundColor: const Color.fromARGB(255, 96, 126, 201),
+                    icon: const Icon(
+                      Icons.delete,
+                      color: Color(0xFFFFFFFF),
+                    ),
                     label: const Text(
                       'Remover',
-                      style: TextStyle(
-                        letterSpacing: 0,
-                      ),
+                      style:
+                          TextStyle(letterSpacing: 0, color: Color(0xFFFFFFFF)),
                     ),
                     onPressed: () {
                       if (selecionadas.isNotEmpty) {
@@ -285,8 +288,7 @@ class _TarefasPageState extends State<TarefasPage> {
                           int tarefasRemovidas =
                               0; // Contador para tarefas removidas
                           for (var tarefa in List.from(selecionadas)) {
-                            tarefasRepo.removerTarefa(
-                                tarefa.responsavel, tarefa);
+                            tarefasRepo.removerTarefa(senhaCasa, tarefa);
                             tarefasRemovidas++;
                           }
                           limparSelecionadas();
@@ -302,31 +304,22 @@ class _TarefasPageState extends State<TarefasPage> {
                 : const SizedBox(width: 0),
             const SizedBox(width: 120),
             FloatingActionButton.extended(
-              onPressed: () async {
-                // Navegar para NovaTarefaPage e aguardar o resultado
-                final novaTarefa = await Navigator.push(
+              backgroundColor: const Color.fromARGB(255, 96, 126, 201),
+              onPressed: () {
+                Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => const NovaTarefaPage()),
+                    builder: (context) => const NovaTarefaPage(),
+                  ),
                 );
-
-                // Se uma nova tarefa foi criada, adicione-a ao repositório
-                if (novaTarefa != null) {
-                  tarefasRepo.criarTarefa(senhaCasa, novaTarefa);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                          'Tarefa "${novaTarefa.nome}" criada com sucesso!'),
-                    ),
-                  );
-                }
               },
-              icon: const Icon(Icons.add),
+              icon: const Icon(
+                Icons.add,
+                color: Color(0xFFFFFFFF),
+              ),
               label: const Text(
                 'Criar Tarefa',
-                style: TextStyle(
-                  letterSpacing: 0,
-                ),
+                style: TextStyle(letterSpacing: 0, color: Color(0xFFFFFFFF)),
               ),
             ),
           ],

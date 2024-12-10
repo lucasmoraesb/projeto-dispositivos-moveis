@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../models/tarefa.dart';
 import '../repositories/casas_repository.dart';
+import '../repositories/tarefas_favoritas_repository.dart';
 import '../repositories/tarefas_repository.dart';
 import '../pages/tarefas_descricao_page.dart';
 import '../widgets/tarefa_card.dart';
@@ -18,7 +19,61 @@ class CalendarioCard extends StatefulWidget {
 
 class _CalendarioCardState extends State<CalendarioCard> {
   List<Tarefa> selecionadas = [];
-  String? _filtroUsername; // Filtro por username
+  late TarefasFavoritasRepository favoritas;
+  String? _filtroUsername;
+
+  AppBar appBarDinamica() {
+    if (selecionadas.isEmpty) {
+      return AppBar(
+        iconTheme: const IconThemeData(color: Color(0xFFFFFFFF)),
+        centerTitle: true,
+        title: const Text('Tarefas do Dia'),
+        titleTextStyle: const TextStyle(
+          color: Color(0xFFFFFFFF),
+          fontSize: 25,
+        ),
+        elevation: 2,
+      );
+    } else {
+      return AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.close),
+          onPressed: () {
+            setState(() {
+              selecionadas = [];
+            });
+          },
+        ),
+        centerTitle: true,
+        title: const Text('Tarefas Selecionadas'),
+        actions: [
+          IconButton(
+            onPressed: () {
+              setState(() {
+                for (var tarefa in selecionadas) {
+                  if (!favoritas.lista.contains(tarefa)) {
+                    favoritas.saveAll([tarefa]);
+                  }
+                }
+                selecionadas = [];
+              });
+            },
+            icon: const Icon(
+              Icons.star,
+              size: 30,
+              color: Colors.amber,
+            ),
+          )
+        ],
+        elevation: 2,
+        iconTheme: const IconThemeData(color: Color(0xFFFFFFFF)),
+        titleTextStyle: const TextStyle(
+          color: Color(0xFFFFFFFF),
+          fontSize: 25,
+        ),
+      );
+    }
+  } // Filtro por username
 
   void mostrarDetalhes(Tarefa tarefa) {
     Navigator.push(
@@ -29,22 +84,39 @@ class _CalendarioCardState extends State<CalendarioCard> {
     );
   }
 
-  void showAlertDialog(BuildContext context, Function onConfirm) {
+  void mostrarSnackBar(String mensagem) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(mensagem),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  limparSelecionadas() {
+    setState(() {
+      selecionadas = [];
+    });
+  }
+
+  void showAlertDialog2(
+      BuildContext context, List<Tarefa> selecionadas, Function onConfirm) {
     Widget cancelaButton = TextButton(
       child: const Text("Cancelar"),
       onPressed: () {
-        Navigator.of(context).pop();
+        Navigator.of(context).pop(); // Fecha o diálogo
       },
     );
 
     Widget continuaButton = TextButton(
       child: const Text("Continuar"),
       onPressed: () {
-        onConfirm();
-        Navigator.of(context).pop();
+        onConfirm(); // Chama a função de confirmação
+        Navigator.of(context).pop(); // Fecha o diálogo
       },
     );
 
+    // Configura o AlertDialog
     AlertDialog alert = AlertDialog(
       title: const Text("Confirmação"),
       content: const Text("Deseja realmente excluir as tarefas selecionadas?"),
@@ -54,12 +126,19 @@ class _CalendarioCardState extends State<CalendarioCard> {
       ],
     );
 
+    // Exibe o diálogo
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return alert;
       },
     );
+  }
+
+  excluirTarefa(Tarefa tarefa) {
+    final tarefasRepo = Provider.of<TarefasRepository>(context, listen: false);
+    tarefasRepo.removerTarefa(tarefa.responsavel, tarefa);
+    mostrarSnackBar('Tarefa excluída com sucesso!'); // Exibe o SnackBar aqui
   }
 
   @override
@@ -74,10 +153,7 @@ class _CalendarioCardState extends State<CalendarioCard> {
     final membros = casasRepo.obterMembrosDaCasa();
 
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: Text(formattedDate),
-      ),
+      appBar: appBarDinamica(),
       body: Column(
         children: [
           // Dropdown para o filtro por responsável
@@ -159,11 +235,10 @@ class _CalendarioCardState extends State<CalendarioCard> {
                           }
                         });
                       },
-                      onDelete: (tarefa) {
-                        showAlertDialog(context, () async {
-                          await tarefasRepo.removerTarefa(senhaCasa, tarefa);
-                          setState(() {});
-                        });
+                      onDelete: (Tarefa tarefa) {
+                        excluirTarefa(tarefa);
+                        mostrarSnackBar(
+                            'Tarefa "${tarefa.nome}" excluída com sucesso!');
                       },
                     );
                   },
@@ -175,19 +250,32 @@ class _CalendarioCardState extends State<CalendarioCard> {
       ),
       floatingActionButton: selecionadas.isNotEmpty
           ? FloatingActionButton.extended(
-              icon: const Icon(Icons.delete),
-              label: const Text('Remover'),
+              backgroundColor: const Color.fromARGB(255, 96, 126, 201),
+              icon: const Icon(
+                Icons.delete,
+                color: Color(0xFFFFFFFF),
+              ),
+              label: const Text(
+                'Remover',
+                style: TextStyle(letterSpacing: 0, color: Color(0xFFFFFFFF)),
+              ),
               onPressed: () {
-                showAlertDialog(context, () async {
-                  final tarefasRepo =
-                      Provider.of<TarefasRepository>(context, listen: false);
-                  for (var tarefa in selecionadas) {
-                    await tarefasRepo.removerTarefa(senhaCasa, tarefa);
-                  }
-                  setState(() {
-                    selecionadas.clear();
+                if (selecionadas.isNotEmpty) {
+                  // Chama o diálogo de confirmação
+                  showAlertDialog2(context, selecionadas, () {
+                    int tarefasRemovidas = 0; // Contador para tarefas removidas
+                    for (var tarefa in List.from(selecionadas)) {
+                      tarefasRepo.removerTarefa(senhaCasa, tarefa);
+                      tarefasRemovidas++;
+                    }
+                    limparSelecionadas();
+
+                    // Exibir mensagem com o número de tarefas removidas
+                    mostrarSnackBar(
+                      '$tarefasRemovidas tarefa(s) removida(s) com sucesso!',
+                    );
                   });
-                });
+                }
               },
             )
           : null,

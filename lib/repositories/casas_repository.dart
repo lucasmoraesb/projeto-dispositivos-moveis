@@ -1,5 +1,6 @@
 import 'dart:collection';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:projeto_dispositivos_moveis/databases/db_firestore.dart';
 import 'package:projeto_dispositivos_moveis/models/casa.dart';
@@ -17,10 +18,80 @@ class CasasRepository extends ChangeNotifier {
 
   _startRepository() async {
     await _startFirestore();
+    _authCheckCasas();
   }
 
   _startFirestore() {
     db = DBFirestore.get();
+  }
+
+  void _authCheckCasas() {
+    FirebaseAuth.instance.authStateChanges().listen((user) async {
+      if (user != null) {
+        await _syncCasas();
+        print("Casas:$_lista");
+      } else {
+        _lista.clear();
+        notifyListeners();
+      }
+    });
+  }
+
+  Future<void> _syncCasas() async {
+    try {
+      final casasSnapshot = await db.collection('casas').get();
+      Casa? casaAtual; // Permite que casaAtual seja nula
+
+      // Obtém o usuário logado
+      final currentUser = FirebaseAuth.instance.currentUser;
+
+      if (currentUser == null) {
+        print("Erro: usuário não logado.");
+        return; // Retorna caso não tenha usuário logado
+      }
+
+      // Busca o nome de usuário na coleção 'usuarios'
+      final usuarioSnapshot =
+          await db.collection('usuarios').doc(currentUser.uid).get();
+      String? nomeUsuario =
+          usuarioSnapshot.data()?['username']; // Campo 'username'
+
+      if (nomeUsuario == null) {
+        print("Erro: nome de usuário não encontrado.");
+        return; // Retorna caso o username não esteja no banco de dados
+      }
+
+      // Busca as casas e verifica se o usuário está em alguma delas
+      for (var doc in casasSnapshot.docs) {
+        final data = doc.data();
+        final casa = Casa(
+          nome: data['nome'],
+          criador: data['criador'],
+          membros: List<String>.from(data['membros'] ?? []),
+          senha: data['senha'],
+        );
+
+        _lista.add(casa);
+
+        if (casa.membros.contains(nomeUsuario)) {
+          casaAtual = casa; // Armazena a casa em que o usuário está
+          break; // Sai do loop após encontrar a casa correta
+        }
+      }
+
+      if (casaAtual != null) {
+        // Caso o usuário esteja em uma casa, define a senhaCasaAtual
+        senhaCasaAtual = casaAtual.senha;
+        print("Usuário está na casa: ${casaAtual.nome}");
+      } else {
+        print("Usuário não está em nenhuma casa.");
+      }
+
+      notifyListeners(); // Notifica a UI
+      print("SUCESSO");
+    } catch (e) {
+      print("Erro ao sincronizar casas: $e");
+    }
   }
 
   String _senhaCasaAtual = '';
@@ -106,6 +177,8 @@ class CasasRepository extends ChangeNotifier {
             _lista[casaIndex].membros.add(usernameLogado);
           } else {
             // Exibe um Snackbar informando o erro
+            print(_lista);
+            print("username ta zuado");
             return false;
           }
 

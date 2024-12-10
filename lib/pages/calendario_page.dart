@@ -32,7 +32,9 @@ class _CalendarioPageState extends State<CalendarioPage> {
 
   // Método para obter a contagem de tarefas para um dia específico
   Future<int> _getTarefasCountForDay(DateTime day) async {
-    final tarefasRepository = TarefasRepository(auth: AuthService());
+    final tarefasRepository = TarefasRepository(
+        auth: AuthService(),
+        casasRepository: CasasRepository(auth: AuthService()));
     final todasTarefas =
         await tarefasRepository.getTarefasPorSenhaCasa(senhaCasa).first;
     return todasTarefas.where((tarefa) {

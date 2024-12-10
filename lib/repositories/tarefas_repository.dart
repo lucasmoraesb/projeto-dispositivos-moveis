@@ -1,18 +1,22 @@
 import 'dart:collection';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:projeto_dispositivos_moveis/databases/db_firestore.dart';
 import 'package:projeto_dispositivos_moveis/models/casa.dart';
 import 'package:projeto_dispositivos_moveis/services/auth_service.dart';
 import '../models/tarefa.dart';
+import 'casas_repository.dart';
 
 class TarefasRepository extends ChangeNotifier {
   final List<Tarefa> _lista = [];
   late FirebaseFirestore db;
   late AuthService auth;
+  final CasasRepository casasRepository;
 
-  TarefasRepository({required this.auth}) {
+  TarefasRepository({required this.auth, required this.casasRepository}) {
     _startRepository();
+    _authCheckTarefas();
   }
 
   _startRepository() async {
@@ -21,6 +25,53 @@ class TarefasRepository extends ChangeNotifier {
 
   _startFirestore() {
     db = DBFirestore.get();
+  }
+
+  void _authCheckTarefas() {
+    print("casa atual: $casasRepository");
+    FirebaseAuth.instance.authStateChanges().listen((user) async {
+      if (user != null && casasRepository.senhaCasaAtual.isNotEmpty) {
+        await _syncTarefas(casasRepository.senhaCasaAtual);
+        print("Tarefas: $_lista");
+      } else {
+        _lista.clear();
+        notifyListeners();
+      }
+    });
+  }
+
+  Future<void> _syncTarefas(String senhaCasa) async {
+    try {
+      final querySnapshot = await db
+          .collection('casas')
+          .where('senha', isEqualTo: senhaCasa)
+          .get();
+
+      if (querySnapshot.docs.isEmpty) {
+        _lista.clear();
+        notifyListeners();
+        return;
+      }
+
+      final casaId = querySnapshot.docs.first.id;
+      final tarefasSnapshot =
+          await db.collection('casas').doc(casaId).collection('tarefas').get();
+
+      _lista.clear();
+      _lista.addAll(tarefasSnapshot.docs.map((doc) {
+        return Tarefa(
+          nome: doc['nome'],
+          data: DateTime.parse(doc['data']),
+          descricao: doc['descricao'],
+          responsavel: doc['responsavel'],
+          status: doc['status'],
+        );
+      }).toList());
+
+      notifyListeners();
+    } catch (e) {
+      print("Erro ao sincronizar tarefas: $e");
+    }
   }
 
   UnmodifiableListView<Tarefa> get lista => UnmodifiableListView(_lista);

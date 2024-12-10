@@ -46,29 +46,6 @@ class _ConfiguracoesPageState extends State<ConfiguracoesPage> {
                   ],
                 )),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 24),
-            child: OutlinedButton(
-                onPressed: () async {
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(
-                        builder: (context) => const NovaCasaPage()),
-                  );
-                },
-                style: OutlinedButton.styleFrom(foregroundColor: Colors.red),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.all(16.0),
-                      child: Text(
-                        'Criar Casa',
-                        style: TextStyle(fontSize: 18),
-                      ),
-                    )
-                  ],
-                )),
-          )
         ],
       ),
     );

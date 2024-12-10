@@ -19,11 +19,13 @@ void main() async {
         providers: [
           ChangeNotifierProvider(create: (context) => AuthService()),
           ChangeNotifierProvider(
-              create: (context) =>
-                  TarefasRepository(auth: context.read<AuthService>())),
-          ChangeNotifierProvider(
               create: (context) => CasasRepository(
                     auth: context.read<AuthService>(),
+                  )),
+          ChangeNotifierProvider(
+              create: (context) => TarefasRepository(
+                    auth: context.read<AuthService>(),
+                    casasRepository: context.read<CasasRepository>(),
                   )),
           ChangeNotifierProvider(
               create: (context) => TarefasFavoritasRepository()),

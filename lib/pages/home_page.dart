@@ -65,9 +65,9 @@ class _HomePageState extends State<HomePage> {
           )
         ],
         elevation: 2,
-        iconTheme: const IconThemeData(color: Colors.black87),
+        iconTheme: const IconThemeData(color: Color(0xFFFFFFFF)),
         titleTextStyle: const TextStyle(
-          color: Colors.black87,
+          color: Color(0xFFFFFFFF),
           fontSize: 25,
         ),
       );
@@ -92,30 +92,72 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  excluirTarefasSelecionadas() async {
-    final casasRepo = Provider.of<CasasRepository>(context, listen: false);
-    final senhaCasa = casasRepo.senhaCasaAtual;
-
-    for (var tarefa in selecionadas) {
-      final tarefasRepo =
-          Provider.of<TarefasRepository>(context, listen: false);
-      await tarefasRepo.removerTarefa(senhaCasa, tarefa);
-    }
-
+  limparSelecionadas() {
     setState(() {
-      selecionadas.clear();
+      selecionadas = [];
     });
+  }
+
+  void showAlertDialog2(
+      BuildContext context, List<Tarefa> selecionadas, Function onConfirm) {
+    Widget cancelaButton = TextButton(
+      child: const Text("Cancelar"),
+      onPressed: () {
+        Navigator.of(context).pop(); // Fecha o diálogo
+      },
+    );
+
+    Widget continuaButton = TextButton(
+      child: const Text("Continuar"),
+      onPressed: () {
+        onConfirm(); // Chama a função de confirmação
+        Navigator.of(context).pop(); // Fecha o diálogo
+      },
+    );
+
+    // Configura o AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: const Text("Confirmação"),
+      content: const Text("Deseja realmente excluir as tarefas selecionadas?"),
+      actions: [
+        cancelaButton,
+        continuaButton,
+      ],
+    );
+
+    // Exibe o diálogo
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+
+  void mostrarSnackBar(String mensagem) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(mensagem),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  excluirTarefa(Tarefa tarefa) {
+    final tarefasRepo = Provider.of<TarefasRepository>(context, listen: false);
+    tarefasRepo.removerTarefa(tarefa.responsavel, tarefa);
+    mostrarSnackBar('Tarefa excluída com sucesso!'); // Exibe o SnackBar aqui
   }
 
   @override
   Widget build(BuildContext context) {
     favoritas = Provider.of<TarefasFavoritasRepository>(context);
+    final tarefasRepo = Provider.of<TarefasRepository>(context);
     final casasRepo = Provider.of<CasasRepository>(context);
     final senhaCasa = casasRepo.senhaCasaAtual;
 
     // Obter lista de membros da casa
     final membros = casasRepo.obterMembrosDaCasa();
-    print(membros);
 
     return Scaffold(
       appBar: appBarDinamica(),
@@ -210,11 +252,10 @@ class _HomePageState extends State<HomePage> {
                                     : selecionadas.add(tarefa);
                               });
                             },
-                            onDelete: (Tarefa tarefa) async {
-                              await excluirTarefasSelecionadas();
-                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                  content: Text(
-                                      'Tarefa "${tarefa.nome}" excluída com sucesso!')));
+                            onDelete: (Tarefa tarefa) {
+                              excluirTarefa(tarefa);
+                              mostrarSnackBar(
+                                  'Tarefa "${tarefa.nome}" excluída com sucesso!');
                             },
                           );
                         },
@@ -224,23 +265,65 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: const Color.fromARGB(255, 96, 126, 201),
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const NovaTarefaPage(),
+      floatingActionButton: Align(
+        alignment: Alignment.bottomRight,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            selecionadas.isNotEmpty
+                ? FloatingActionButton.extended(
+                    backgroundColor: const Color.fromARGB(255, 96, 126, 201),
+                    icon: const Icon(
+                      Icons.delete,
+                      color: Color(0xFFFFFFFF),
+                    ),
+                    label: const Text(
+                      'Remover',
+                      style:
+                          TextStyle(letterSpacing: 0, color: Color(0xFFFFFFFF)),
+                    ),
+                    onPressed: () {
+                      if (selecionadas.isNotEmpty) {
+                        // Chama o diálogo de confirmação
+                        showAlertDialog2(context, selecionadas, () {
+                          int tarefasRemovidas =
+                              0; // Contador para tarefas removidas
+                          for (var tarefa in List.from(selecionadas)) {
+                            tarefasRepo.removerTarefa(senhaCasa, tarefa);
+                            tarefasRemovidas++;
+                          }
+                          limparSelecionadas();
+
+                          // Exibir mensagem com o número de tarefas removidas
+                          mostrarSnackBar(
+                            '$tarefasRemovidas tarefa(s) removida(s) com sucesso!',
+                          );
+                        });
+                      }
+                    },
+                  )
+                : const SizedBox(width: 0),
+            const SizedBox(width: 120),
+            FloatingActionButton.extended(
+              backgroundColor: const Color.fromARGB(255, 96, 126, 201),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const NovaTarefaPage(),
+                  ),
+                );
+              },
+              icon: const Icon(
+                Icons.add,
+                color: Color(0xFFFFFFFF),
+              ),
+              label: const Text(
+                'Criar Tarefa',
+                style: TextStyle(letterSpacing: 0, color: Color(0xFFFFFFFF)),
+              ),
             ),
-          );
-        },
-        icon: const Icon(
-          Icons.add,
-          color: Color(0xFFFFFFFF),
-        ),
-        label: const Text(
-          'Criar Tarefa',
-          style: TextStyle(letterSpacing: 0, color: Color(0xFFFFFFFF)),
+          ],
         ),
       ),
     );
