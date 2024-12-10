@@ -8,6 +8,7 @@ import '../pages/nova_tarefa_page.dart';
 import '../models/tarefa.dart';
 import '../widgets/tarefa_card.dart';
 import 'configuracoes_page.dart';
+import 'conta_page.dart';
 
 class TarefasPage extends StatefulWidget {
   const TarefasPage({super.key});
@@ -26,6 +27,15 @@ class _TarefasPageState extends State<TarefasPage> {
       context,
       MaterialPageRoute(
         builder: (_) => const ConfiguracoesPage(),
+      ),
+    );
+  }
+
+  mostrarConta() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const ContaPage(),
       ),
     );
   }
@@ -169,14 +179,33 @@ class _TarefasPageState extends State<TarefasPage> {
         child: ListView(
           children: [
             ListTile(
-              leading: const Padding(
-                padding: EdgeInsets.only(
-                    right: 8.0), // Adiciona um padding à direita do ícone
-                child: Icon(Icons.settings), // Ícone de engrenagem
+              leading: const Icon(
+                Icons.settings,
+                size: 30,
               ),
-              title: const Text('Configurações'),
+              title: const Text(
+                'Configurações',
+                style: TextStyle(
+                  fontSize: 18, // Aumenta o tamanho da fonte
+                ),
+              ),
               onTap: () {
                 mostrarConfiguracoes();
+              },
+            ),
+            ListTile(
+              leading: const Icon(
+                Icons.account_circle,
+                size: 30,
+              ),
+              title: const Text(
+                'Conta',
+                style: TextStyle(
+                  fontSize: 18, // Aumenta o tamanho da fonte
+                ),
+              ),
+              onTap: () {
+                mostrarConta();
               },
             ),
           ],

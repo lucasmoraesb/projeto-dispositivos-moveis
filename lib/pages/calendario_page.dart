@@ -7,6 +7,7 @@ import '../models/tarefa.dart';
 import '../services/auth_service.dart';
 import 'package:provider/provider.dart';
 import '../repositories/casas_repository.dart';
+import 'conta_page.dart';
 
 class CalendarioPage extends StatefulWidget {
   const CalendarioPage({super.key});
@@ -53,6 +54,15 @@ class _CalendarioPageState extends State<CalendarioPage> {
     );
   }
 
+  mostrarConta() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const ContaPage(),
+      ),
+    );
+  }
+
   // Método para atualizar a contagem de tarefas para o mês atual
   /* void _updateTarefasCount() async {
     for (var i = 0; i < 31; i++) {
@@ -89,13 +99,33 @@ class _CalendarioPageState extends State<CalendarioPage> {
         child: ListView(
           children: [
             ListTile(
-              leading: const Padding(
-                padding: EdgeInsets.only(right: 8.0),
-                child: Icon(Icons.settings),
+              leading: const Icon(
+                Icons.settings,
+                size: 30,
               ),
-              title: const Text('Configurações'),
+              title: const Text(
+                'Configurações',
+                style: TextStyle(
+                  fontSize: 18, // Aumenta o tamanho da fonte
+                ),
+              ),
               onTap: () {
                 mostrarConfiguracoes();
+              },
+            ),
+            ListTile(
+              leading: const Icon(
+                Icons.account_circle,
+                size: 30,
+              ),
+              title: const Text(
+                'Conta',
+                style: TextStyle(
+                  fontSize: 18, // Aumenta o tamanho da fonte
+                ),
+              ),
+              onTap: () {
+                mostrarConta();
               },
             ),
           ],
