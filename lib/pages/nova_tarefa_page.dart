@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:permission_handler/permission_handler.dart'; // Importando o pacote de permissões
 
 import '../models/tarefa.dart';
 import '../repositories/tarefas_repository.dart';
-import '../repositories/casas_repository.dart'; // Importando o CasasRepository
+import '../repositories/casas_repository.dart';
+import '../services/notification_service.dart'; // Importação do serviço de notificações
 
 class NovaTarefaPage extends StatefulWidget {
   const NovaTarefaPage({super.key});
@@ -23,8 +25,6 @@ class _NovaTarefaPageState extends State<NovaTarefaPage> {
   Widget build(BuildContext context) {
     final casasRepo = Provider.of<CasasRepository>(context);
     final senhaCasa = casasRepo.senhaCasaAtual;
-
-    // Obter os membros da casa
     final membros = casasRepo.obterMembrosDaCasa();
 
     return Scaffold(
@@ -51,7 +51,6 @@ class _NovaTarefaPageState extends State<NovaTarefaPage> {
                 controller: _descricaoController,
                 decoration: const InputDecoration(labelText: 'Descrição'),
               ),
-              // Dropdown para selecionar o responsável
               DropdownButtonFormField<String>(
                 value: _responsavel,
                 decoration: const InputDecoration(labelText: 'Responsável'),
@@ -84,15 +83,41 @@ class _NovaTarefaPageState extends State<NovaTarefaPage> {
                     lastDate: DateTime.now().add(const Duration(days: 365)),
                   );
                   if (dataSelecionada != null) {
-                    setState(() {
-                      _dataSelecionada = dataSelecionada;
-                    });
+                    // Após a seleção da data, mostre o seletor de hora
+                    final horaSelecionada = await showTimePicker(
+                      context: context,
+                      initialTime: TimeOfDay.fromDateTime(
+                          DateTime.now()), // Hora atual como padrão
+                    );
+                    if (horaSelecionada != null) {
+                      setState(() {
+                        // Combine a data e a hora escolhidas
+                        _dataSelecionada = DateTime(
+                          dataSelecionada.year,
+                          dataSelecionada.month,
+                          dataSelecionada.day,
+                          horaSelecionada.hour,
+                          horaSelecionada.minute,
+                        );
+                      });
+
+                      // Verifique se a data selecionada está no futuro em relação ao horário atual
+                      final now = DateTime.now();
+                      if (_dataSelecionada!.isBefore(now)) {
+                        // Caso a data esteja no passado, ajusta para o futuro (exemplo: 1 minuto a mais)
+                        _dataSelecionada = now.add(const Duration(minutes: 1));
+                      }
+
+                      // Exibe a data e hora selecionadas
+                      print(
+                          'Data e Hora selecionadas: ${_dataSelecionada!.toLocal()}');
+                    }
                   }
                 },
                 child: Text(
                   _dataSelecionada == null
-                      ? 'Selecionar Data'
-                      : 'Data: ${_dataSelecionada!.toLocal()}',
+                      ? 'Selecionar Data e Hora'
+                      : 'Data e Hora: ${_dataSelecionada!.toLocal()}',
                 ),
               ),
               const SizedBox(height: 16),
@@ -100,24 +125,41 @@ class _NovaTarefaPageState extends State<NovaTarefaPage> {
                 onPressed: () async {
                   if (_formKey.currentState!.validate() &&
                       _dataSelecionada != null) {
-                    final novaTarefa = Tarefa(
-                      nome: _nomeController.text,
-                      data: _dataSelecionada!,
-                      descricao: _descricaoController.text,
-                      responsavel: _responsavel ?? '',
-                      status: 'Não concluída',
-                    );
+                    // Verifique se a permissão foi concedida antes de exibir a notificação
+                    var status = await Permission.notification.request();
+                    if (status.isGranted) {
+                      final novaTarefa = Tarefa(
+                        nome: _nomeController.text,
+                        data: _dataSelecionada!,
+                        descricao: _descricaoController.text,
+                        responsavel: _responsavel ?? '',
+                        status: 'Não concluída',
+                      );
 
-                    final tarefasRepo =
-                        Provider.of<TarefasRepository>(context, listen: false);
+                      final tarefasRepo = Provider.of<TarefasRepository>(
+                          context,
+                          listen: false);
+                      await tarefasRepo.criarTarefa(senhaCasa, novaTarefa);
 
-                    await tarefasRepo.criarTarefa(senhaCasa, novaTarefa);
+                      // **Exibindo a notificação no horário escolhido**
+                      NotificationService.showNotificationAtScheduledTime(
+                        0, // ID da notificação
+                        _nomeController.text,
+                        _descricaoController.text.isNotEmpty
+                            ? _descricaoController.text
+                            : "Lembrete de Tarefa",
+                        _dataSelecionada!, // Hora e data selecionada pelo usuário
+                      );
 
-                    Navigator.pop(context, novaTarefa);
+                      Navigator.pop(context, novaTarefa);
+                    } else {
+                      // Trate o caso onde a permissão foi negada
+                      print('Permissão para notificações não foi concedida');
+                    }
                   }
                 },
                 child: const Text('Salvar'),
-              ),
+              )
             ],
           ),
         ),
