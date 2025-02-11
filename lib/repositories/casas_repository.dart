@@ -40,7 +40,11 @@ class CasasRepository extends ChangeNotifier {
   Casa? get casaAtual {
     return _lista.firstWhere(
       (casa) => casa.senha == _senhaCasaAtual,
-      orElse: () => null as Casa, // Retorno explícito como nullable
+      orElse: () => Casa(
+          senha: '',
+          nome: '',
+          criador: '',
+          membros: []), // Retorno explícito como nullable
     );
   }
 

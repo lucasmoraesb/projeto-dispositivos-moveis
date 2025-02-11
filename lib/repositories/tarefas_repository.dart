@@ -10,7 +10,7 @@ import 'casas_repository.dart';
 
 class TarefasRepository extends ChangeNotifier {
   final List<Tarefa> _lista = [];
-  late FirebaseFirestore db;
+  late FirebaseFirestore db = FirebaseFirestore.instance;
   late AuthService auth;
   final CasasRepository casasRepository;
 
@@ -300,5 +300,41 @@ class TarefasRepository extends ChangeNotifier {
   remove(Tarefa tarefa) {
     _lista.remove(tarefa);
     notifyListeners();
+  }
+
+  Future<void> atualizarImagemTarefa(
+      String senhaCasa, Tarefa tarefa, String imageUrl) async {
+    try {
+      final querySnapshot = await db
+          .collection('casas')
+          .where('senha', isEqualTo: senhaCasa)
+          .get();
+
+      if (querySnapshot.docs.isEmpty) {
+        throw Exception("Nenhuma casa encontrada com a senha fornecida.");
+      }
+
+      final casaId = querySnapshot.docs.first.id;
+
+      final tarefasSnapshot = await db
+          .collection('casas')
+          .doc(casaId)
+          .collection('tarefas')
+          .where('nome', isEqualTo: tarefa.nome)
+          .where('data', isEqualTo: tarefa.data.toIso8601String())
+          .get();
+
+      if (tarefasSnapshot.docs.isNotEmpty) {
+        await tarefasSnapshot.docs.first.reference.update({
+          'imagemUrl': imageUrl,
+        });
+        notifyListeners();
+      } else {
+        throw Exception("Tarefa não encontrada para atualização.");
+      }
+    } catch (e) {
+      print("Erro ao atualizar a imagem da tarefa: $e");
+      throw Exception("Erro ao atualizar a imagem da tarefa: $e");
+    }
   }
 }
